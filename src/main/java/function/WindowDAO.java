@@ -35,13 +35,37 @@ public void winLoad() {
                 winY = 400;
                 winWidth = 500;
                 winHeight = 200;
+
+            try {
+                sta.execute("""
+                        INSERT INTO c_window(x, y, width, height)
+                        VALUES (600, 400, 500, 200)
+                        """);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
+        }
         } catch(SQLException e){
             throw new RuntimeException(e);
         }
     }
-//ウィンドウ情報を保存
-    public void winSave () {
 
+    //ウィンドウ情報を保存
+    public void winSave(int winX, int winY, int winWidth, int winHeight) {
+        try (Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
+             PreparedStatement pst = con.prepareStatement("""
+                     UPDATE c_window
+                     SET x = ?, y = ?, width = ?, height = ?
+                     """);) {
+            pst.setInt(1, winX);
+            pst.setInt(2, winY);
+            pst.setInt(3, winWidth);
+            pst.setInt(4, winHeight);
+            pst.execute();
+
+        } catch (SQLException e) {
+            throw
+                    new RuntimeException(e);
+        }
     }
 }

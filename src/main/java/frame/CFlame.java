@@ -1,10 +1,11 @@
 package frame;
 
 import function.Controler;
-import function.WindowDAO;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class CFlame extends JFrame{
 
@@ -15,9 +16,18 @@ public class CFlame extends JFrame{
         setTitle("amazon");
         setBounds(controler.windowDAO.winX, controler.windowDAO.winY, controler.windowDAO.winWidth, controler.windowDAO.winHeight);
         setVisible(true);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        //ウィンドウを閉じた時の処理
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                controler.windowDAO.winSave(getX(), getY(), getWidth(), getHeight());
+            }
+        });
 
         JScrollPane sp = new JScrollPane();
+        JTable table = new JTable();
+
+        sp.add(table);
 
         getContentPane().add(sp, BorderLayout.CENTER);
     }
