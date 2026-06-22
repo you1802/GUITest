@@ -34,7 +34,7 @@ public class CospaDTO {
            default -> "";
        };
         //フォーマット　"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL
-        String[] cospaStr = {
+        return new String[]{
                 getName(),
                 Integer.toString(getCalory() / getCost() * getNumber() * 100),
                 Integer.toString(getCost()),
@@ -44,7 +44,6 @@ public class CospaDTO {
                 getDate(),
                 getUrl()
         };
-        return cospaStr;
     }
 
    //以下アクセッサー

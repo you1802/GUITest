@@ -17,7 +17,7 @@ public class Controller {
     public String[][] convert() {
         String[][] listStr =list.stream().filter(cospaDTO -> !cospaDTO.isDeleted())
                 .map(CospaDTO::cospaDTOToString)
-                .toArray(String[][]::new);;
+                .toArray(String[][]::new);
 
         return listStr;
     }
