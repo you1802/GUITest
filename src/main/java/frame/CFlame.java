@@ -1,6 +1,6 @@
 package frame;
 
-import function.Controler;
+import function.Controller;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +10,7 @@ import java.awt.event.WindowEvent;
 public class CFlame extends JFrame{
 
     private final String[] columnNames = {"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL"};
-    Controler controler = new Controler();
+    Controller controler = new Controller();
 
     public CFlame() {
         setTitle("amazon");
@@ -24,10 +24,10 @@ public class CFlame extends JFrame{
             }
         });
 
-        JScrollPane sp = new JScrollPane();
         JTable table = new JTable();
+        JScrollPane sp = new JScrollPane(table);
 
-        sp.add(table);
+
 
         getContentPane().add(sp, BorderLayout.CENTER);
     }

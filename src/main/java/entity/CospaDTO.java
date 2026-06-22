@@ -24,6 +24,29 @@ public class CospaDTO {
 
    public CospaDTO(){}
 
+    //cospaDTOを文字列配列に変換
+    public String[] cospaDTOToString(){
+
+       String p = switch (getPurpose()) {
+           case 1 -> "燃料";
+           case 2 -> "糖分";
+           case 3 -> "その他";
+           default -> "";
+       };
+        //フォーマット　"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL
+        String[] cospaStr = {
+                getName(),
+                Integer.toString(getCalory() / getCost() * getNumber() * 100),
+                Integer.toString(getCost()),
+                Integer.toString(getCalory()),
+                Integer.toString(getNumber()),
+                p,
+                getDate(),
+                getUrl()
+        };
+        return cospaStr;
+    }
+
    //以下アクセッサー
 
     public int getId() {
