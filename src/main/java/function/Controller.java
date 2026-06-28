@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class Controller {
     CospaDAO cospaDAO = new CospaDAO();
     public WindowDAO windowDAO = new WindowDAO();
-    ArrayList<CospaDTO> list;
+    public static ArrayList<CospaDTO> list;
 
     public Controller(){
         windowDAO.winLoad();
