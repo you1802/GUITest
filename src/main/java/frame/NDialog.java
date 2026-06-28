@@ -4,7 +4,6 @@ import entity.CospaDTO;
 import function.Controller;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,8 +49,8 @@ public class NDialog extends JFrame implements ActionListener {
     public NDialog(JFrame owner){
         this.owner = owner;
         nDialog = new JDialog(owner, "商品情報入力", true);
-        InputVerifier inputStr = new InputStr();
-        InputVerifier inputInt = new InputInt();
+        this.inputStr = new InputStr();
+        this.inputInt = new InputInt();
     }
 
     @Override
