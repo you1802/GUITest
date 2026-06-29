@@ -2,7 +2,7 @@ import frame.CFlame;
 
 public class GuiTest {
     static void main() {
-        CFlame mFlame = new CFlame();
+        CFlame mFlame = CFlame.getInstance();
 
     }
 }

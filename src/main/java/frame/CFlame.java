@@ -10,6 +10,8 @@ import java.awt.event.WindowEvent;
 
 public class CFlame extends JFrame {
 
+    public static CFlame cFlame;
+
     private final String[] columnNames = {"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL"};
     Controller controller = new Controller();
 
@@ -47,5 +49,12 @@ public class CFlame extends JFrame {
         getContentPane().add(p1, BorderLayout.NORTH);
 
         setVisible(true);
+    }
+
+    public static CFlame getInstance(){
+        if (cFlame == null){
+            cFlame = new CFlame();
+        }
+        return cFlame;
     }
 }

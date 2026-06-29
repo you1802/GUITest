@@ -4,12 +4,14 @@ import entity.CospaDTO;
 import function.Controller;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 public class NDialog extends JFrame implements ActionListener {
 
@@ -25,36 +27,42 @@ public class NDialog extends JFrame implements ActionListener {
     InputVerifier inputInt;
 
     //入力判定用のクラスを継承して作成
-    class InputStr extends InputVerifier{
+    class InputV extends InputVerifier {
+
+        String match;
+
+        public InputV(String match) {
+            this.match = match;
+        }
 
         @Override
         public boolean verify(JComponent input) {
             JTextField tf = (JTextField) input;
-            if (tf.getText().matches("\\w+")){return true;}
-            else{return false;}
+            if (tf.getText().matches(match)) {return true;}
+            else {return false;}
         }
-    }
-    
-    class InputInt extends InputVerifier{
 
         @Override
-        public boolean verify(JComponent input) {
-            JTextField tf = (JTextField) input;
-            if (tf.getText().matches("\\d+")){return true;}
-            else{return false;}
+        public boolean shouldYieldFocus(JComponent source, JComponent target) {
+            if (verify(source)) {source.setBorder(new LineBorder(Color.GRAY));}
+            else {source.setBorder(new LineBorder(Color.RED));}
+
+            if (target instanceof JButton){
+                //一括判定
+            }
+            return true;
         }
     }
-
 
     public NDialog(JFrame owner){
         this.owner = owner;
-        nDialog = new JDialog(owner, "商品情報入力", true);
-        this.inputStr = new InputStr();
-        this.inputInt = new InputInt();
+        this.inputStr = new InputV(".+");
+        this.inputInt = new InputV("\\d+");
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        nDialog = new JDialog(owner, "商品情報入力", true);
         FlowLayout fLayout = new FlowLayout();
         fLayout.setAlignment(FlowLayout.LEFT);
 
@@ -83,6 +91,7 @@ public class NDialog extends JFrame implements ActionListener {
         JTextField calT = new JTextField(4);
         JTextField cosT = new JTextField(5);
         JTextField numT = new JTextField(3);
+        JTextField[] textFields = {urlT, nameT, calT, cosT, numT};
 
         urlT.setInputVerifier(inputStr);
         nameT.setInputVerifier(inputStr);
@@ -102,39 +111,29 @@ public class NDialog extends JFrame implements ActionListener {
         purG.add(purR3);
 
         JButton addB = new JButton("追加");
-        addB.addActionListener(new ActionListener() {
+
+        addB.addActionListener(new ActionListener() {        //入力決定したとき
             @Override
             public void actionPerformed(ActionEvent e) {
-                //入力決定したとき
+
                 String purT = purG.getSelection().getActionCommand();
 
-                JTextField[] textFields = {urlT, nameT, calT, cosT, numT};
-                for (JTextField t : textFields) {
-                    //InputVerifier verifier = t.getInputVerifier();
-                    if (t.getInputVerifier().verify(t)) {
+                //入力がInputverifier通りか判定
+                if(Arrays.stream(textFields).allMatch(t -> t.getInputVerifier().verify(t))){
 
-                        //boolean isValid = verifier.verify(t);
-                    } else {
-
-                        JOptionPane.showMessageDialog(nDialog, "入力エラー");
-                        return;
-                    }
+                    CospaDTO cospaDTO = new CospaDTO(
+                            Controller.list.isEmpty() ? 0 : Controller.list.getLast().getId() + 1,
+                            urlT.getText(),
+                            nameT.getText(),
+                            LocalDateTime.now().toString(),
+                            Integer.parseInt(cosT.getText()),
+                            Integer.parseInt(numT.getText()),
+                            Integer.parseInt(purT),
+                            Integer.parseInt(calT.getText()));
                 }
-
-
-                // boolean isValid = urlT.getInputVerifier().verify(urlT) && nameT.getInputVerifier().verify(nameT) && calT.getInputVerifier().verify(calL) && cosT.getInputVerifier().verify(cosT) && numT.getInputVerifier().verify(numT)
-
-                CospaDTO cospaDTO = new CospaDTO(
-                        Controller.list.isEmpty() ? 0 : Controller.list.getLast().getId() + 1,
-                        urlT.getText(),
-                        nameT.getText(),
-                        LocalDateTime.now().toString(),
-                        Integer.parseInt(cosT.getText()),
-                        Integer.parseInt(numT.getText()),
-                        Integer.parseInt(purT),
-                        Integer.parseInt(calT.getText()));
-
-
+                else {
+                    Toolkit.getDefaultToolkit().beep();
+                }
             }
         });
 
@@ -145,11 +144,10 @@ public class NDialog extends JFrame implements ActionListener {
         np0.add(np1); np0.add(np2); np0.add(np3);
         nDialog.add(ns);
 
-        nDialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        nDialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         nDialog.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-               // System.out.println(nDialog.getX() + " " + nDialog.getY() + " " + nDialog.getWidth() + " " + nDialog.getHeight());
-
+                nDialog = null;
             }
         });
         nDialog.pack();
