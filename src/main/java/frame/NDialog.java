@@ -13,10 +13,9 @@ import java.awt.event.WindowEvent;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-public class NDialog extends JFrame implements ActionListener {
+public class NDialog extends JDialog {
 
     JFrame owner;
-    JDialog nDialog;
     String url;
     String cName;
     int pur;
@@ -25,6 +24,7 @@ public class NDialog extends JFrame implements ActionListener {
     int num;
     InputVerifier inputStr;
     InputVerifier inputInt;
+    JTextField[] textField;
 
     //入力判定用のクラスを継承して作成
     class InputV extends InputVerifier {
@@ -38,8 +38,7 @@ public class NDialog extends JFrame implements ActionListener {
         @Override
         public boolean verify(JComponent input) {
             JTextField tf = (JTextField) input;
-            if (tf.getText().matches(match)) {return true;}
-            else {return false;}
+           return tf.getText().matches(match);
         }
 
         @Override
@@ -47,29 +46,22 @@ public class NDialog extends JFrame implements ActionListener {
             if (verify(source)) {source.setBorder(new LineBorder(Color.GRAY));}
             else {source.setBorder(new LineBorder(Color.RED));}
 
-            if (target instanceof JButton){
-                //一括判定
-            }
             return true;
         }
     }
 
     public NDialog(JFrame owner){
+        super(owner, "商品情報入力", true);
         this.owner = owner;
         this.inputStr = new InputV(".+");
         this.inputInt = new InputV("\\d+");
-    }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        nDialog = new JDialog(owner, "商品情報入力", true);
+
         FlowLayout fLayout = new FlowLayout();
         fLayout.setAlignment(FlowLayout.LEFT);
 
-        //nDialog.setSize(600, 142);
-        nDialog.setLocationRelativeTo(owner);
         JPanel np0 = new JPanel();
-        JScrollPane ns = new JScrollPane(np0);
+
         np0.setLayout(new BoxLayout(np0, BoxLayout.PAGE_AXIS));
         JPanel np1 = new JPanel(fLayout);
         JPanel np2 = new JPanel(fLayout);
@@ -130,8 +122,12 @@ public class NDialog extends JFrame implements ActionListener {
                             Integer.parseInt(numT.getText()),
                             Integer.parseInt(purT),
                             Integer.parseInt(calT.getText()));
-                }
-                else {
+
+                    setVisible(false);
+                } else {
+                    //一括正誤判定
+                    Arrays.stream(textFields).forEach(t -> t.getInputVerifier().shouldYieldFocus(t, addB));
+                    Arrays.stream(textFields).filter(t -> t.getInputVerifier().verify(t)).forEach(t -> t.setBorder(new LineBorder(Color.BLUE)));
                     Toolkit.getDefaultToolkit().beep();
                 }
             }
@@ -142,17 +138,19 @@ public class NDialog extends JFrame implements ActionListener {
         np3.add(calL); np3.add(calT); np3.add(cosL); np3.add(cosT); np3.add(numL); np3.add(numT); np3.add(Box.createRigidArea(new Dimension(260, 1))); np3.add(addB);
 
         np0.add(np1); np0.add(np2); np0.add(np3);
-        nDialog.add(ns);
+        add(np0);
 
-        nDialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        nDialog.addWindowListener(new WindowAdapter() {
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                nDialog = null;
+
+
             }
         });
-        nDialog.pack();
-        nDialog.setVisible(true);
+        pack();
+
     }
+
 //ゲッター
     public String getUrl(){return url;}
     public String getCName(){return cName;}

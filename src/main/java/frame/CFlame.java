@@ -40,7 +40,11 @@ public class CFlame extends JFrame {
         p1.setLayout(fLayout);
 
         //サブウィンドウ
-        newB.addActionListener(new NDialog(this));
+        newB.addActionListener(e -> {
+            NDialog nDialog = new NDialog(this);
+            nDialog.setLocationRelativeTo(this);
+            nDialog.setVisible(true);
+        });
 
         //メインフレームへの追加
         p1.add(newB);
