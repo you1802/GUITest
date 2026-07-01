@@ -49,8 +49,8 @@ public class CFlame extends JFrame {
         //メインフレームへの追加
         p1.add(newB);
 
-        getContentPane().add(sp, BorderLayout.CENTER);
-        getContentPane().add(p1, BorderLayout.NORTH);
+        this.add(sp, BorderLayout.CENTER);
+        this.add(p1, BorderLayout.NORTH);
 
         setVisible(true);
     }

@@ -5,6 +5,8 @@ import function.Controller;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,7 +26,10 @@ public class NDialog extends JDialog {
     int num;
     InputVerifier inputStr;
     InputVerifier inputInt;
-    JTextField[] textField;
+    LineBorder lBRed = new LineBorder(Color.RED);
+    LineBorder lBGray = new LineBorder(Color.GRAY);
+    LineBorder lBBlue = new LineBorder(Color.BLUE);
+    LineBorder lBOrange = new LineBorder(Color.ORANGE);
 
     //入力判定用のクラスを継承して作成
     class InputV extends InputVerifier {
@@ -43,8 +48,8 @@ public class NDialog extends JDialog {
 
         @Override
         public boolean shouldYieldFocus(JComponent source, JComponent target) {
-            if (verify(source)) {source.setBorder(new LineBorder(Color.GRAY));}
-            else {source.setBorder(new LineBorder(Color.RED));}
+            if (verify(source)) {source.setBorder(lBGray);}
+            else {source.setBorder(lBRed);}
 
             return true;
         }
@@ -123,11 +128,31 @@ public class NDialog extends JDialog {
                             Integer.parseInt(purT),
                             Integer.parseInt(calT.getText()));
 
+                    var tm = CFlame.getInstance().getContentPane().getComponent(0);
+                    //tm.addRow(cospaDTO.cospaDTOToString());
+
                     setVisible(false);
                 } else {
                     //一括正誤判定
-                    Arrays.stream(textFields).forEach(t -> t.getInputVerifier().shouldYieldFocus(t, addB));
-                    Arrays.stream(textFields).filter(t -> t.getInputVerifier().verify(t)).forEach(t -> t.setBorder(new LineBorder(Color.BLUE)));
+
+                    JTextField[] dif = Arrays.stream(textFields).filter(t -> !t.getInputVerifier().verify(t)).toArray(JTextField[]::new);
+                    Arrays.stream(dif).forEach(t -> t.setBorder(lBRed));
+                    Timer timer = new Timer(100, new ActionListener() {
+                        int c = 0;
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            c++;
+                            if (c == 5) {((Timer) e.getSource()).stop();
+                            }else if(c%2 == 0) {Arrays.stream(dif).forEach(t -> t.setBorder(lBRed));
+                            }else if (c%2 == 1){Arrays.stream(dif).forEach(t -> t.setBorder(lBOrange));
+                            }
+                            Arrays.stream(dif).forEach(Component::repaint);
+                        }
+                    });
+                    timer.start();
+
+                   // Arrays.stream(textFields).forEach(t -> t.getInputVerifier().shouldYieldFocus(t, addB));
+                    Arrays.stream(textFields).filter(t -> t.getInputVerifier().verify(t)).forEach(t -> t.setBorder(lBBlue));
                     Toolkit.getDefaultToolkit().beep();
                 }
             }
