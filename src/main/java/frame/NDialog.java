@@ -6,7 +6,6 @@ import function.Controller;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,12 +17,6 @@ import java.util.Arrays;
 public class NDialog extends JDialog {
 
     JFrame owner;
-    String url;
-    String cName;
-    int pur;
-    int cal;
-    int cos;
-    int num;
     InputVerifier inputStr;
     InputVerifier inputInt;
     LineBorder lBRed = new LineBorder(Color.RED);
@@ -31,7 +24,7 @@ public class NDialog extends JDialog {
     LineBorder lBBlue = new LineBorder(Color.BLUE);
     LineBorder lBOrange = new LineBorder(Color.ORANGE);
 
-    //入力判定用のクラスを継承して作成
+    //入力判定用のインナークラスを継承して作成
     class InputV extends InputVerifier {
 
         String match;
@@ -60,7 +53,6 @@ public class NDialog extends JDialog {
         this.owner = owner;
         this.inputStr = new InputV(".+");
         this.inputInt = new InputV("\\d+");
-
 
         FlowLayout fLayout = new FlowLayout();
         fLayout.setAlignment(FlowLayout.LEFT);
@@ -128,13 +120,14 @@ public class NDialog extends JDialog {
                             Integer.parseInt(purT),
                             Integer.parseInt(calT.getText()));
 
-                    var tm = CFlame.getInstance().getContentPane().getComponent(0);
-                    //tm.addRow(cospaDTO.cospaDTOToString());
+                    //CFlameからテーブルを取得して行を追加
+                    ((DefaultTableModel)((JTable) ((JScrollPane) CFlame.getInstance().getContentPane().getComponent(0)).getViewport().getView()).getModel()).addRow(cospaDTO.cospaDTOToString());
+                    //DBに保存
+                    Controller.getInstance().save(cospaDTO);
 
                     setVisible(false);
                 } else {
                     //一括正誤判定
-
                     JTextField[] dif = Arrays.stream(textFields).filter(t -> !t.getInputVerifier().verify(t)).toArray(JTextField[]::new);
                     Arrays.stream(dif).forEach(t -> t.setBorder(lBRed));
                     Timer timer = new Timer(100, new ActionListener() {
@@ -151,7 +144,6 @@ public class NDialog extends JDialog {
                     });
                     timer.start();
 
-                   // Arrays.stream(textFields).forEach(t -> t.getInputVerifier().shouldYieldFocus(t, addB));
                     Arrays.stream(textFields).filter(t -> t.getInputVerifier().verify(t)).forEach(t -> t.setBorder(lBBlue));
                     Toolkit.getDefaultToolkit().beep();
                 }
@@ -175,12 +167,4 @@ public class NDialog extends JDialog {
         pack();
 
     }
-
-//ゲッター
-    public String getUrl(){return url;}
-    public String getCName(){return cName;}
-    public int getPur(){return pur;}
-    public int getCal(){return cal;}
-    public int getCos(){return cos;}
-    public int getNum(){return num;}
 }

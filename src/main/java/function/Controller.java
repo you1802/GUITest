@@ -8,6 +8,7 @@ public class Controller {
     CospaDAO cospaDAO = new CospaDAO();
     public WindowDAO windowDAO = new WindowDAO();
     public static ArrayList<CospaDTO> list;
+    public static Controller controller;
 
     public Controller(){
         windowDAO.winLoad();
@@ -22,4 +23,15 @@ public class Controller {
                 .toArray(String[][]::new);
     }
 
+    public void save(CospaDTO cospaDTO){
+        cospaDAO.save(cospaDTO);
+    }
+
+    public static Controller getInstance(){
+        if (controller == null){
+            controller = new Controller();
+        }
+        return controller;
+
+    }
 }
