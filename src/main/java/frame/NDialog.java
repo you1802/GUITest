@@ -158,12 +158,7 @@ public class NDialog extends JDialog {
         add(np0);
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-
-
-            }
-        });
+       
         pack();
 
     }
