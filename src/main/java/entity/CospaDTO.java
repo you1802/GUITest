@@ -33,16 +33,18 @@ public class CospaDTO {
            case 3 -> "その他";
            default -> "";
        };
-        //フォーマット　"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL
+        //フォーマット　"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL", "id", "削除子"
         return new String[]{
                 getName(),
-                Integer.toString(getCalory() / getCost() * getNumber() * 100),
+                null,
                 Integer.toString(getCost()),
                 Integer.toString(getCalory()),
                 Integer.toString(getNumber()),
                 p,
                 getDate(),
-                getUrl()
+                getUrl(),
+                Integer.toString(getId()),
+                String.valueOf(isDeleted())
         };
     }
 
