@@ -94,14 +94,14 @@ public class CospaDAO {
     }
 
     //行を編集
-    public String editDB(String column, int id, String s){
+    public String editNameDB(int id, String s){
         try {
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
                     UPDATE cospa
-                    SET %s = ?
+                    SET name = ?
                     WHERE id = ?
-                    """.formatted(column));
+                    """);
             psta.setString(1, s);
             psta.setInt(2, id);
             psta.execute();
@@ -114,14 +114,94 @@ public class CospaDAO {
         return s;
     }
 
-    public int editDB(String column, int id, int i){
+    public String editUrlDB(int id, String s){
+        try {
+            Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
+            PreparedStatement psta = con.prepareStatement("""
+                    UPDATE cospa
+                    SET url = ?
+                    WHERE id = ?
+                    """);
+            psta.setString(1, s);
+            psta.setInt(2, id);
+            psta.execute();
+
+            con.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return s;
+    }
+
+    public int editCostDB(int id, int i){
         try {
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
                      UPDATE cospa 
-                     SET %s = ? 
+                     SET cost = ? 
                      WHERE id = ?
-                     """.formatted(column));
+                     """);
+            psta.setInt(1, i);
+            psta.setInt(2, id);
+            psta.execute();
+
+            con.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return i;
+    }
+
+    public int editPurposeDB(int id, int i){
+        try {
+            Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
+            PreparedStatement psta = con.prepareStatement("""
+                     UPDATE cospa 
+                     SET purpose = ? 
+                     WHERE id = ?
+                     """);
+            psta.setInt(1, i);
+            psta.setInt(2, id);
+            psta.execute();
+
+            con.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return i;
+    }
+
+    public int editNumberDB(int id, int i){
+        try {
+            Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
+            PreparedStatement psta = con.prepareStatement("""
+                     UPDATE cospa 
+                     SET number = ? 
+                     WHERE id = ?
+                     """);
+            psta.setInt(1, i);
+            psta.setInt(2, id);
+            psta.execute();
+
+            con.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return i;
+    }
+
+    public int editCaloryDB(int id, int i){
+        try {
+            Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
+            PreparedStatement psta = con.prepareStatement("""
+                     UPDATE cospa 
+                     SET calory = ? 
+                     WHERE id = ?
+                     """);
             psta.setInt(1, i);
             psta.setInt(2, id);
             psta.execute();

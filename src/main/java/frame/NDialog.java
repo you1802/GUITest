@@ -18,39 +18,14 @@ public class NDialog extends JDialog {
     InputVerifier inputStr;
     InputVerifier inputInt;
     LineBorder lBRed = new LineBorder(Color.RED);
-    LineBorder lBGray = new LineBorder(Color.GRAY);
     LineBorder lBBlue = new LineBorder(Color.BLUE);
     LineBorder lBOrange = new LineBorder(Color.ORANGE);
-
-    //入力判定用のインナークラスを継承して作成
-    class InputV extends InputVerifier {
-
-        String match;
-
-        public InputV(String match) {
-            this.match = match;
-        }
-
-        @Override
-        public boolean verify(JComponent input) {
-            JTextField tf = (JTextField) input;
-           return tf.getText().matches(match);
-        }
-
-        @Override
-        public boolean shouldYieldFocus(JComponent source, JComponent target) {
-            if (verify(source)) {source.setBorder(lBGray);}
-            else {source.setBorder(lBRed);}
-
-            return true;
-        }
-    }
 
     public NDialog(JFrame owner){
         super(owner, "商品情報入力", true);
         this.owner = owner;
-        this.inputStr = new InputV(".+");
-        this.inputInt = new InputV("\\d+");
+        inputStr = new InputV(".+");
+        inputInt = new InputV("\\d+");
 
         FlowLayout fLayout = new FlowLayout();
         fLayout.setAlignment(FlowLayout.LEFT);
@@ -99,7 +74,11 @@ public class NDialog extends JDialog {
 
         JButton addB = new JButton("追加");
 
-        addB.addActionListener(new ActionListener() {        //入力決定したとき
+        addB.addActionListener(new ActionListener() {
+            /**
+             * 入力決定したとき
+             * @param e the event to be processed
+             */
             @Override
             public void actionPerformed(ActionEvent e) {
 

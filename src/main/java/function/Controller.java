@@ -24,8 +24,12 @@ public class Controller {
     public void save(CospaDTO cospaDTO){
         cospaDAO.save(cospaDTO);
     }
-    public String editDB(String colum, int id, String s){return cospaDAO.editDB(colum, id, s);}
-    public int editDB(String colum, int id, int i){return cospaDAO.editDB(colum, id, i);}
+    public String editNameDB(int id, String s){return cospaDAO.editNameDB(id, s);}
+    public String editUrlDB(int id, String s){return cospaDAO.editUrlDB(id, s);}
+    public int editCostDB(int id, int i){return cospaDAO.editCostDB(id, i);}
+    public int editCaloryDB(int id, int i){return cospaDAO.editCaloryDB(id, i);}
+    public int editPurposeDB(int id, int i){return cospaDAO.editPurposeDB(id, i);}
+    public int editNumberDB(int id, int i){return cospaDAO.editNumberDB(id, i);}
 
     public static Controller getInstance(){
         if (controller == null){
