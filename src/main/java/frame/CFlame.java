@@ -38,6 +38,11 @@ public class CFlame extends JFrame {
 
         //コンポーネントの列挙
         DefaultTableModel mainTM = new DefaultTableModel(controller.convert(), columnNames) {
+            /**
+             * ソートのための型指定
+             * @param columnIndex  the column being queried
+             * @return
+             */
             @Override
             public Class<?> getColumnClass(int columnIndex) {
                 switch (columnIndex) {
@@ -47,17 +52,35 @@ public class CFlame extends JFrame {
                     case 3: return Integer.class;
                     case 4: return Integer.class;
                     case 5: return Object.class;
-                    case 6: return Integer.class;
+                    case 6: return String.class;
                     case 7: return String.class;
                     case 8: return Integer.class;
-                    case 9: return Boolean.class;
+                    case 9: return Boolean.class;   //チェックボックス化
                     default: return Object.class;
                 }
             }
+
+            /**
+             * 書き込んだ数値をInteger型で保存
+             * @param aValue          the new value; this can be null
+             * @param row             the row whose value is to be changed
+             * @param column          the column whose value is to be changed
+             */
+            @Override
+            public void setValueAt(Object aValue, int row, int column){
+                if(getColumnClass(column) == Integer.class && aValue instanceof String){
+                    try {
+                        aValue = Integer.parseInt((String) aValue);
+                    } catch (NumberFormatException e) {
+                        aValue = 0;
+                    }
+                }
+                super.setValueAt(aValue, row, column);
+            }
         };
         JTable table = new JTable(mainTM);
-        table.removeColumn(table.getColumnModel().getColumn(9));
-        table.removeColumn(table.getColumnModel().getColumn(8));
+        //table.removeColumn(table.getColumnModel().getColumn(9));
+        //table.removeColumn(table.getColumnModel().getColumn(8));
         JScrollPane sp = new JScrollPane(table);
 
         FlowLayout fLayout = new FlowLayout();
@@ -81,7 +104,7 @@ public class CFlame extends JFrame {
         intTF.setInputVerifier(inputInt);
         int[] strCs = {0, 7};
         int[] intCs = {2, 3, 4};
-        DefaultCellEditor strCE = new DefaultCellEditor(strTF) {    //エディターの判定をオーバーライドして追加
+        DefaultCellEditor strCE = new DefaultCellEditor(strTF) {    //エディターの入力可能判定をオーバーライドして追加
             @Override
             public boolean stopCellEditing() {
                 if(!strTF.getInputVerifier().verify(strTF)) return false;
@@ -104,35 +127,45 @@ public class CFlame extends JFrame {
             @Override
             public void tableChanged(TableModelEvent e) {
                 int row = e.getFirstRow();
-                int colum = e.getColumn();
-                String s = (String) mainTM.getValueAt(row, colum);
+                int column = e.getColumn();
 
                 //テーブルの変更を検知
                 if (e.getType() == TableModelEvent.UPDATE) {
-                    switch (colum) {
-                        //コスパに変動があった場合、再計算
+                    Object o = mainTM.getValueAt(row, column);
+                    switch (column) {
                         case 0:
-                            controller.editNameDB((Integer) mainTM.getValueAt(row, 8), s);
+                            controller.editNameDB((Integer) mainTM.getValueAt(row, 8), (String) o);
                             break;
-                        case  2, 3, 4:
-                        switch (colum) {
-                           case  2:controller.editCostDB((Integer) mainTM.getValueAt(row, 8), Integer.parseInt(s)); break;
-                           case  3:controller.editCaloryDB((Integer) mainTM.getValueAt(row, 8), Integer.parseInt(s));
-                           case  4:
-                        }
+                        case  2, 3, 4: {
+                            switch (column) {
+                                case 2: controller.editCostDB((Integer) mainTM.getValueAt(row, 8), (Integer) o); break;
+                                case 3: controller.editCaloryDB((Integer) mainTM.getValueAt(row, 8), (Integer) o); break;
+                                case 4: controller.editNumberDB((Integer) mainTM.getValueAt(row, 8), (Integer) o); break;
+                            }
+                            //コスパに変動があった場合、再計算
                             mainTM.removeTableModelListener(this);
-                            mainTM.setValueAt(String.valueOf((Integer.parseInt(mainTM.getValueAt(row, 3).toString()) / Integer.parseInt(mainTM.getValueAt(row, 2).toString()) * (Integer.parseInt(mainTM.getValueAt(row, 4).toString())))), row, 1);
+                            int calory = (Integer) mainTM.getValueAt(row, 3);
+                            int cost = (Integer) mainTM.getValueAt(row, 2);
+                            int number = (Integer) mainTM.getValueAt(row, 4);
+                            int result = (calory * 100 * number) / cost;
+                            mainTM.setValueAt(result, row, 1);
                             mainTM.addTableModelListener(this);
                             break;
-                        case  5:
-                        case  6:
-                        case  7:
+                        }
+                        case  5: controller.editPurposeDB((Integer) mainTM.getValueAt(row, 8), (Integer) o); break;
+                        case  7: controller.editUrlDB((Integer) mainTM.getValueAt(row, 8), (String) o);
                     }
-                    //変更箇所によって変換しDBに保存
-
-                    if(s.matches("\\d+")) controller.editUrlDB(mainTM.getColumnName(colum) , Integer.parseInt((String) mainTM.getValueAt(row, 8)), Integer.parseInt(s));
-                    else controller.editUrlDB(mainTM.getColumnName(colum) , (Integer.parseInt((String) mainTM.getValueAt(row, 8))), s);
                 }
+
+//                if (e.getType() == TableModelEvent.INSERT) {
+//                    mainTM.removeTableModelListener(this);
+//                    int calory = (Integer) mainTM.getValueAt(row, 3);
+//                    int cost = (Integer) mainTM.getValueAt(row, 2);
+//                    int number = (Integer) mainTM.getValueAt(row, 4);
+//                    int result = (calory * 100 * number) / cost;
+//                    mainTM.setValueAt(result, row, 1);
+//                    mainTM.addTableModelListener(this);
+//                }
             }
         });
 

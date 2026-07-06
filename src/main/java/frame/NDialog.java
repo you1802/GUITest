@@ -98,9 +98,11 @@ public class NDialog extends JDialog {
                             Integer.parseInt(calT.getText()));
 
                     //CFlameからテーブルを取得して行を追加
-                    ((DefaultTableModel)((JTable) ((JScrollPane) CFlame.getInstance().getContentPane().getComponent(0)).getViewport().getView()).getModel()).addRow(cospaDTO.cospaDTOToString());
+                    ((DefaultTableModel)((JTable) ((JScrollPane) CFlame.getInstance().getContentPane().getComponent(0)).getViewport().getView()).getModel()).addRow(cospaDTO.cospaDTOForm());
                     //DBに保存
                     Controller.getInstance().save(cospaDTO);
+                    //listに追加
+                    Controller.list.add(cospaDTO);
 
                     setVisible(false);
                 } else {

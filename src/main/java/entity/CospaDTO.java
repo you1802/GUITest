@@ -25,7 +25,7 @@ public class CospaDTO {
    public CospaDTO(){}
 
     //cospaDTOを文字列配列に変換
-    public String[] cospaDTOToString(){
+    public Object[] cospaDTOForm(){
 
        String p = switch (getPurpose()) {
            case 1 -> "燃料";
@@ -34,17 +34,17 @@ public class CospaDTO {
            default -> "";
        };
         //フォーマット　"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL", "id", "削除子"
-        return new String[]{
+        return new Object[]{
                 getName(),
                 null,
-                Integer.toString(getCost()),
-                Integer.toString(getCalory()),
-                Integer.toString(getNumber()),
+                getCost(),
+                getCalory(),
+                getNumber(),
                 p,
                 getDate(),
                 getUrl(),
-                Integer.toString(getId()),
-                String.valueOf(isDeleted())
+                getId(),
+                isDeleted()
         };
     }
 

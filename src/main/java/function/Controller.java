@@ -16,9 +16,9 @@ public class Controller {
     }
 
     //listを文字列2次元配列に変換
-    public String[][] convert() {
+    public Object[][] convert() {
 
-        return list.stream().map(CospaDTO::cospaDTOToString).toArray(String[][]::new);
+        return list.stream().map(CospaDTO::cospaDTOForm).toArray(Object[][]::new);
     }
     //中継メソッド
     public void save(CospaDTO cospaDTO){
