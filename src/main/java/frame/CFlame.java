@@ -6,10 +6,12 @@ import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class CFlame extends JFrame {
 
@@ -36,12 +38,17 @@ public class CFlame extends JFrame {
             }
         });
 
-        //コンポーネントの列挙
-        DefaultTableModel mainTM = new DefaultTableModel(controller.convert(), columnNames) {
+        //以下コンポーネントの列挙
+
+        //データ読み込み時コスパを計算
+        Object[][] tableList = controller.convert();
+        Arrays.stream(tableList).forEach(o -> o[1] = objToInt(o[3]) * 100 * objToInt(o[4]) / objToInt(o[2]));
+
+        DefaultTableModel mainTM = new DefaultTableModel(tableList, columnNames) {
             /**
              * ソートのための型指定
              * @param columnIndex  the column being queried
-             * @return
+             * @return セルの内容
              */
             @Override
             public Class<?> getColumnClass(int columnIndex) {
@@ -78,7 +85,21 @@ public class CFlame extends JFrame {
                 super.setValueAt(aValue, row, column);
             }
         };
+
         JTable table = new JTable(mainTM);
+
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(mainTM);
+        table.setRowSorter(sorter);
+        RowFilter<DefaultTableModel, Integer> filter = new RowFilter<DefaultTableModel, Integer>() {
+            //表示フィルターを設定
+            @Override
+            public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+                Boolean b = (Boolean) entry.getValue(9);
+                return b ==null || !b;
+            }
+        };
+
+
         //table.removeColumn(table.getColumnModel().getColumn(9));
         //table.removeColumn(table.getColumnModel().getColumn(8));
         JScrollPane sp = new JScrollPane(table);
@@ -126,7 +147,7 @@ public class CFlame extends JFrame {
         mainTM.addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
-                int row = e.getFirstRow();
+                int row = table.convertRowIndexToModel(e.getFirstRow()); //モデルインデックスに変換
                 int column = e.getColumn();
 
                 //テーブルの変更を検知
@@ -148,7 +169,7 @@ public class CFlame extends JFrame {
                             int cost = (Integer) mainTM.getValueAt(row, 2);
                             int number = (Integer) mainTM.getValueAt(row, 4);
                             int result = (calory * 100 * number) / cost;
-                            mainTM.setValueAt(result, row, 1);
+                            mainTM.setValueAt(result, e.getFirstRow(), 1); //行はビューインデックス
                             mainTM.addTableModelListener(this);
                             break;
                         }
@@ -157,15 +178,6 @@ public class CFlame extends JFrame {
                     }
                 }
 
-//                if (e.getType() == TableModelEvent.INSERT) {
-//                    mainTM.removeTableModelListener(this);
-//                    int calory = (Integer) mainTM.getValueAt(row, 3);
-//                    int cost = (Integer) mainTM.getValueAt(row, 2);
-//                    int number = (Integer) mainTM.getValueAt(row, 4);
-//                    int result = (calory * 100 * number) / cost;
-//                    mainTM.setValueAt(result, row, 1);
-//                    mainTM.addTableModelListener(this);
-//                }
             }
         });
 
@@ -198,6 +210,10 @@ public class CFlame extends JFrame {
         this.add(p1, BorderLayout.NORTH);
 
         setVisible(true);
+    }
+
+    public int objToInt(Object o){
+        return Integer.parseInt(o.toString());
     }
 
     public static CFlame getInstance(){
