@@ -11,7 +11,6 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
-import java.util.Objects;
 
 public class CFlame extends JFrame {
 
@@ -87,7 +86,7 @@ public class CFlame extends JFrame {
         };
 
         JTable table = new JTable(mainTM);
-
+        //ソート機能を追加
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(mainTM);
         table.setRowSorter(sorter);
         RowFilter<DefaultTableModel, Integer> filter = new RowFilter<DefaultTableModel, Integer>() {
@@ -95,10 +94,11 @@ public class CFlame extends JFrame {
             @Override
             public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
                 Boolean b = (Boolean) entry.getValue(9);
-                return b ==null || !b;
+                if (b == null)return true;
+                return !b;
             }
         };
-
+        sorter.setRowFilter(filter);
 
         //table.removeColumn(table.getColumnModel().getColumn(9));
         //table.removeColumn(table.getColumnModel().getColumn(8));
@@ -109,12 +109,14 @@ public class CFlame extends JFrame {
 
         JButton newB = new JButton("商品追加");
         JButton removeB = new JButton("削除");
+        JButton allB = new JButton("すべて表示");
         JCheckBox perCB = new JCheckBox();
-        JPanel p1 = new JPanel();
-        p1.setLayout(fLayout);
-        p1.add(newB); p1.add(removeB); p1.add(perCB);
-
-
+        JPanel p1 = new JPanel(fLayout);
+        Box bRB = Box.createHorizontalBox();
+        bRB.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        bRB.add(removeB); bRB.add(perCB);
+        //コンポーネントの配置
+        p1.add(newB); p1.add(bRB); p1.add(allB);
 
         //列ごとにバリデーションを設定
         table.getTableHeader().setReorderingAllowed(false);
@@ -147,8 +149,10 @@ public class CFlame extends JFrame {
         mainTM.addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
-                int row = table.convertRowIndexToModel(e.getFirstRow()); //モデルインデックスに変換
+                int row = e.getFirstRow();
                 int column = e.getColumn();
+
+                if (row < 0 || row == TableModelEvent.HEADER_ROW) return; //非選択時何もしない
 
                 //テーブルの変更を検知
                 if (e.getType() == TableModelEvent.UPDATE) {
@@ -169,7 +173,7 @@ public class CFlame extends JFrame {
                             int cost = (Integer) mainTM.getValueAt(row, 2);
                             int number = (Integer) mainTM.getValueAt(row, 4);
                             int result = (calory * 100 * number) / cost;
-                            mainTM.setValueAt(result, e.getFirstRow(), 1); //行はビューインデックス
+                            mainTM.setValueAt(result, row, 1);
                             mainTM.addTableModelListener(this);
                             break;
                         }
@@ -183,22 +187,33 @@ public class CFlame extends JFrame {
 
         //削除ボタンアクション
         removeB.addActionListener(e -> {
-            if (perCB.isSelected()){
+            int[] selectRows = table.getSelectedRows();
 
-                int[] selectRows = table.getSelectedRows();
-                //↑で取得した被選択行をモデルのインデックスに変換した後ソート
+            if (selectRows.length == 0 || selectRows[0] == -1){return;} //非選択時何もしない
+
+            if (perCB.isSelected()){
+                //取得した被選択行をモデルのインデックスに変換した後ソート
                 int[] modelRows = Arrays.stream(selectRows).map(table::convertRowIndexToModel).toArray();
                 Arrays.sort(modelRows);
 
-                //削除したインデックスが詰められるので後ろから削除
-                for (int i = selectRows.length - 1; i >= 0; i--){
-                    ((DefaultTableModel)table.getModel()).removeRow(modelRows[i]);
+                //削除子をオン
+                for (int i = modelRows.length - 1; i >= 0; i--){
+                    mainTM.setValueAt(true, modelRows[i], 9);
                 }
+                //再フィルター
+                sorter.sort();
 
             }
         });
 
-        //サブウィンドウ
+        //すべて表示ボタンアクション
+        allB.addActionListener(e -> {
+            ADialog aDialog = new ADialog(this, table);
+            aDialog.setLocationRelativeTo(null);
+            aDialog.setVisible(true);
+        });
+
+        //商品追加ボタンアクション
         newB.addActionListener(e -> {
             NDialog nDialog = new NDialog(this);
             nDialog.setLocationRelativeTo(this);
@@ -211,7 +226,7 @@ public class CFlame extends JFrame {
 
         setVisible(true);
     }
-
+    //テーブルから数値を取得する際のキャスト処理
     public int objToInt(Object o){
         return Integer.parseInt(o.toString());
     }
