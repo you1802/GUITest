@@ -1,8 +1,10 @@
 package function;
 
 import entity.CospaDTO;
+import frame.CFlame;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Controller {
     CospaDAO cospaDAO = new CospaDAO();
@@ -17,8 +19,10 @@ public class Controller {
 
     //listを文字列2次元配列に変換
     public Object[][] convert() {
-
-        return list.stream().map(CospaDTO::cospaDTOForm).toArray(Object[][]::new);
+        //変換後コスパを計算
+        Object[][] objects = list.stream().map(CospaDTO::cospaDTOForm).toArray(Object[][]::new);
+        Arrays.stream(objects).forEach(o -> o[1] = CFlame.objToInt(o[3]) * 100 * CFlame.objToInt(o[4]) / CFlame.objToInt(o[2]));
+        return objects;
     }
     //中継メソッド
     public void save(CospaDTO cospaDTO){

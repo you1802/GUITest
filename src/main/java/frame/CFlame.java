@@ -18,7 +18,7 @@ public class CFlame extends JFrame {
     InputVerifier inputStr;
     InputVerifier inputInt;
 
-    private final String[] columnNames = {"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL", "id", "削除子"};
+    public static final String[] COLUMN_NAMES = {"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL", "id", "削除子"};
     Controller controller = Controller.getInstance();
 
     public CFlame() {
@@ -39,11 +39,7 @@ public class CFlame extends JFrame {
 
         //以下コンポーネントの列挙
 
-        //データ読み込み時コスパを計算
-        Object[][] tableList = controller.convert();
-        Arrays.stream(tableList).forEach(o -> o[1] = objToInt(o[3]) * 100 * objToInt(o[4]) / objToInt(o[2]));
-
-        DefaultTableModel mainTM = new DefaultTableModel(tableList, columnNames) {
+        DefaultTableModel mainTM = new DefaultTableModel(controller.convert(), COLUMN_NAMES) {
             /**
              * ソートのための型指定
              * @param columnIndex  the column being queried
@@ -144,7 +140,6 @@ public class CFlame extends JFrame {
         Arrays.stream(strCs).forEach(i -> table.getColumnModel().getColumn(i).setCellEditor(strCE));
         Arrays.stream(intCs).forEach(i -> table.getColumnModel().getColumn(i).setCellEditor(intCE));
 
-
         //テーブル編集アクション
         mainTM.addTableModelListener(new TableModelListener() {
             @Override
@@ -208,7 +203,8 @@ public class CFlame extends JFrame {
 
         //すべて表示ボタンアクション
         allB.addActionListener(e -> {
-            ADialog aDialog = new ADialog(this, table);
+
+            ADialog aDialog = new ADialog(this);
             aDialog.setLocationRelativeTo(null);
             aDialog.setVisible(true);
         });
@@ -226,8 +222,9 @@ public class CFlame extends JFrame {
 
         setVisible(true);
     }
+
     //テーブルから数値を取得する際のキャスト処理
-    public int objToInt(Object o){
+    public static int objToInt(Object o){
         return Integer.parseInt(o.toString());
     }
 
