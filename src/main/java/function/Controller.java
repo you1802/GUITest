@@ -28,6 +28,8 @@ public class Controller {
     public void save(CospaDTO cospaDTO){
         cospaDAO.save(cospaDTO);
     }
+    public void deleteDB(int id) {cospaDAO.deleteDB(id);}
+    public void unDeleDB(int id) {cospaDAO.unDeleDB(id);}
     public String editNameDB(int id, String s){return cospaDAO.editNameDB(id, s);}
     public String editUrlDB(int id, String s){return cospaDAO.editUrlDB(id, s);}
     public int editCostDB(int id, int i){return cospaDAO.editCostDB(id, i);}

@@ -15,6 +15,8 @@ import java.util.Arrays;
 public class CFlame extends JFrame {
 
     public static CFlame cFlame;
+    ADialog aDialog;
+    DefaultTableModel mainTM;
     InputVerifier inputStr;
     InputVerifier inputInt;
 
@@ -39,38 +41,51 @@ public class CFlame extends JFrame {
 
         //以下コンポーネントの列挙
 
-        DefaultTableModel mainTM = new DefaultTableModel(controller.convert(), COLUMN_NAMES) {
+        mainTM = new DefaultTableModel(controller.convert(), COLUMN_NAMES) {
             /**
              * ソートのための型指定
-             * @param columnIndex  the column being queried
+             *
+             * @param columnIndex the column being queried
              * @return セルの内容
              */
             @Override
             public Class<?> getColumnClass(int columnIndex) {
                 switch (columnIndex) {
-                    case 0: return String.class;
-                    case 1: return Integer.class;
-                    case 2: return Integer.class;
-                    case 3: return Integer.class;
-                    case 4: return Integer.class;
-                    case 5: return Object.class;
-                    case 6: return String.class;
-                    case 7: return String.class;
-                    case 8: return Integer.class;
-                    case 9: return Boolean.class;   //チェックボックス化
-                    default: return Object.class;
+                    case 0:
+                        return String.class;
+                    case 1:
+                        return Integer.class;
+                    case 2:
+                        return Integer.class;
+                    case 3:
+                        return Integer.class;
+                    case 4:
+                        return Integer.class;
+                    case 5:
+                        return Object.class;
+                    case 6:
+                        return String.class;
+                    case 7:
+                        return String.class;
+                    case 8:
+                        return Integer.class;
+                    case 9:
+                        return Boolean.class;   //チェックボックス化
+                    default:
+                        return Object.class;
                 }
             }
 
             /**
              * 書き込んだ数値をInteger型で保存
-             * @param aValue          the new value; this can be null
-             * @param row             the row whose value is to be changed
-             * @param column          the column whose value is to be changed
+             *
+             * @param aValue the new value; this can be null
+             * @param row    the row whose value is to be changed
+             * @param column the column whose value is to be changed
              */
             @Override
-            public void setValueAt(Object aValue, int row, int column){
-                if(getColumnClass(column) == Integer.class && aValue instanceof String){
+            public void setValueAt(Object aValue, int row, int column) {
+                if (getColumnClass(column) == Integer.class && aValue instanceof String) {
                     try {
                         aValue = Integer.parseInt((String) aValue);
                     } catch (NumberFormatException e) {
@@ -90,7 +105,7 @@ public class CFlame extends JFrame {
             @Override
             public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
                 Boolean b = (Boolean) entry.getValue(9);
-                if (b == null)return true;
+                if (b == null) return true;
                 return !b;
             }
         };
@@ -110,9 +125,12 @@ public class CFlame extends JFrame {
         JPanel p1 = new JPanel(fLayout);
         Box bRB = Box.createHorizontalBox();
         bRB.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        bRB.add(removeB); bRB.add(perCB);
+        bRB.add(removeB);
+        bRB.add(perCB);
         //コンポーネントの配置
-        p1.add(newB); p1.add(bRB); p1.add(allB);
+        p1.add(newB);
+        p1.add(bRB);
+        p1.add(allB);
 
         //列ごとにバリデーションを設定
         table.getTableHeader().setReorderingAllowed(false);
@@ -126,14 +144,14 @@ public class CFlame extends JFrame {
         DefaultCellEditor strCE = new DefaultCellEditor(strTF) {    //エディターの入力可能判定をオーバーライドして追加
             @Override
             public boolean stopCellEditing() {
-                if(!strTF.getInputVerifier().verify(strTF)) return false;
+                if (!strTF.getInputVerifier().verify(strTF)) return false;
                 return super.stopCellEditing();
             }
         };
         DefaultCellEditor intCE = new DefaultCellEditor(intTF) {    //同上
             @Override
             public boolean stopCellEditing() {
-                if(!intTF.getInputVerifier().verify(intTF)) return false;
+                if (!intTF.getInputVerifier().verify(intTF)) return false;
                 return super.stopCellEditing();
             }
         };
@@ -150,17 +168,23 @@ public class CFlame extends JFrame {
                 if (row < 0 || row == TableModelEvent.HEADER_ROW) return; //非選択時何もしない
 
                 //テーブルの変更を検知
-                if (e.getType() == TableModelEvent.UPDATE) {
+                if (e.getType() == TableModelEvent.UPDATE && e.getSource() == table.getModel()) {
                     Object o = mainTM.getValueAt(row, column);
                     switch (column) {
                         case 0:
                             controller.editNameDB((Integer) mainTM.getValueAt(row, 8), (String) o);
                             break;
-                        case  2, 3, 4: {
+                        case 2, 3, 4: {
                             switch (column) {
-                                case 2: controller.editCostDB((Integer) mainTM.getValueAt(row, 8), (Integer) o); break;
-                                case 3: controller.editCaloryDB((Integer) mainTM.getValueAt(row, 8), (Integer) o); break;
-                                case 4: controller.editNumberDB((Integer) mainTM.getValueAt(row, 8), (Integer) o); break;
+                                case 2:
+                                    controller.editCostDB((Integer) mainTM.getValueAt(row, 8), (Integer) o);
+                                    break;
+                                case 3:
+                                    controller.editCaloryDB((Integer) mainTM.getValueAt(row, 8), (Integer) o);
+                                    break;
+                                case 4:
+                                    controller.editNumberDB((Integer) mainTM.getValueAt(row, 8), (Integer) o);
+                                    break;
                             }
                             //コスパに変動があった場合、再計算
                             mainTM.removeTableModelListener(this);
@@ -172,8 +196,11 @@ public class CFlame extends JFrame {
                             mainTM.addTableModelListener(this);
                             break;
                         }
-                        case  5: controller.editPurposeDB((Integer) mainTM.getValueAt(row, 8), (Integer) o); break;
-                        case  7: controller.editUrlDB((Integer) mainTM.getValueAt(row, 8), (String) o);
+                        case 5:
+                            controller.editPurposeDB((Integer) mainTM.getValueAt(row, 8), (Integer) o);
+                            break;
+                        case 7:
+                            controller.editUrlDB((Integer) mainTM.getValueAt(row, 8), (String) o);
                     }
                 }
 
@@ -184,16 +211,19 @@ public class CFlame extends JFrame {
         removeB.addActionListener(e -> {
             int[] selectRows = table.getSelectedRows();
 
-            if (selectRows.length == 0 || selectRows[0] == -1){return;} //非選択時何もしない
+            if (selectRows.length == 0 || selectRows[0] == -1) {
+                return;
+            } //非選択時何もしない
 
-            if (perCB.isSelected()){
+            if (perCB.isSelected()) {
                 //取得した被選択行をモデルのインデックスに変換した後ソート
                 int[] modelRows = Arrays.stream(selectRows).map(table::convertRowIndexToModel).toArray();
                 Arrays.sort(modelRows);
 
                 //削除子をオン
-                for (int i = modelRows.length - 1; i >= 0; i--){
+                for (int i = modelRows.length - 1; i >= 0; i--) {
                     mainTM.setValueAt(true, modelRows[i], 9);
+                    controller.deleteDB((Integer) mainTM.getValueAt(modelRows[i], 8));
                 }
                 //再フィルター
                 sorter.sort();
@@ -204,9 +234,14 @@ public class CFlame extends JFrame {
         //すべて表示ボタンアクション
         allB.addActionListener(e -> {
 
-            ADialog aDialog = new ADialog(this);
-            aDialog.setLocationRelativeTo(null);
+            if (this.aDialog == null) {
+                this.aDialog = new ADialog(this);
+                this.aDialog.setLocationRelativeTo(null);
+            }
+
             aDialog.setVisible(true);
+            sorter.allRowsChanged();
+            table.repaint();
         });
 
         //商品追加ボタンアクション
@@ -233,5 +268,9 @@ public class CFlame extends JFrame {
             cFlame = new CFlame();
         }
         return cFlame;
+    }
+    //ゲッター
+    public DefaultTableModel getTableModel() {
+        return this.mainTM;
     }
 }

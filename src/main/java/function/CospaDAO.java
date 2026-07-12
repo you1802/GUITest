@@ -93,6 +93,23 @@ public class CospaDAO {
         }
     }
 
+    public void unDeleDB(int id) {
+        try {
+            Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
+            PreparedStatement psta = con.prepareStatement("""
+                    UPDATE cospa
+                    SET deleted = false
+                    WHERE id = ?
+                    """);
+            psta.setInt(1, id);
+            psta.execute();
+
+            con.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     //行を編集
     public String editNameDB(int id, String s){
         try {

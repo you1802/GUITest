@@ -5,7 +5,6 @@ import function.Controller;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,7 +20,7 @@ public class NDialog extends JDialog {
     LineBorder lBBlue = new LineBorder(Color.BLUE);
     LineBorder lBOrange = new LineBorder(Color.ORANGE);
 
-    public NDialog(JFrame owner){
+    public NDialog(CFlame owner){
         super(owner, "商品情報入力", true);
         this.owner = owner;
         inputStr = new InputV(".+");
@@ -98,7 +97,7 @@ public class NDialog extends JDialog {
                             Integer.parseInt(calT.getText()));
 
                     //CFlameからテーブルを取得して行を追加
-                    ((DefaultTableModel)((JTable) ((JScrollPane) CFlame.getInstance().getContentPane().getComponent(0)).getViewport().getView()).getModel()).addRow(cospaDTO.cospaDTOForm());
+                    owner.getTableModel().addRow(cospaDTO.cospaDTOForm());
                     //DBに保存
                     Controller.getInstance().save(cospaDTO);
                     //listに追加

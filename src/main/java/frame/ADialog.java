@@ -9,10 +9,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import static frame.CFlame.COLUMN_NAMES;
 
 public class ADialog extends JDialog {
 
@@ -20,30 +16,14 @@ public class ADialog extends JDialog {
     Controller controller = Controller.getInstance();
 
 
-    public ADialog(JFrame owner) {
+    public ADialog(CFlame owner) {
         super(owner, "全件表示", true);
         this.owner = owner;
 
-        DefaultTableModel mainTM = new DefaultTableModel(controller.convert(), COLUMN_NAMES) {
-            @Override
-            public Class<?> getColumnClass(int columnIndex) {
-                switch (columnIndex) {
-                    case 0: return String.class;
-                    case 1: return Integer.class;
-                    case 2: return Integer.class;
-                    case 3: return Integer.class;
-                    case 4: return Integer.class;
-                    case 5: return Object.class;
-                    case 6: return String.class;
-                    case 7: return String.class;
-                    case 8: return Integer.class;
-                    case 9: return Boolean.class;   //チェックボックス化
-                    default: return Object.class;
-                }
-            }
-        };
 
-        JTable table = new JTable(mainTM) {
+        DefaultTableModel mainTM = owner.getTableModel();
+
+        JTable tableA = new JTable(mainTM) {
             @Override
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 
@@ -55,38 +35,37 @@ public class ADialog extends JDialog {
             }
         };
 
-
-
         //ソート機能を追加
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(mainTM);
-        table.setRowSorter(sorter);
+        tableA.setRowSorter(sorter);
 
-
-
-        JLabel expL = new JLabel("a");
+        JLabel expL = new JLabel("チェックを外すと削除取り消し");
         Box b1 = Box.createHorizontalBox();
-        JScrollPane sp = new JScrollPane(table);
+        JScrollPane sp = new JScrollPane(tableA);
 
-        int[] changeRows;
-
-        JButton appB = new JButton("変更を適用");
-        appB.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
-        });
 
         mainTM.addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
                 //テーブル変更アクション
-                if (e.getType() == TableModelEvent.UPDATE && e.getFirstRow() >= 0 && e.getColumn() >= 0) {
+                if (e.getType() == TableModelEvent.UPDATE && e.getFirstRow() >= 0 && e.getColumn() >= 0 && e.getSource() == tableA.getModel()) {
+                    if (e.getColumn() == 9) {
 
-                    int row = e.getFirstRow();
-                    boolean b = false;
+                        mainTM.removeTableModelListener(this);
 
+                        int row = tableA.convertRowIndexToModel(e.getFirstRow());
+                        boolean b = (boolean) mainTM.getValueAt(row, 9);
 
+                        if (b) controller.deleteDB((Integer) mainTM.getValueAt(row, 8));
+                        else controller.unDeleDB((Integer) mainTM.getValueAt(row, 8));
+
+                        mainTM.fireTableCellUpdated(row, 9);
+
+                        tableA.repaint();
+
+                        mainTM.addTableModelListener(this);
+
+                    }
                 }
             }
         });
