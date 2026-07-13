@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class NDialog extends JDialog {
 
-    JFrame owner;
+    CFlame owner;
     InputVerifier inputStr;
     InputVerifier inputInt;
     LineBorder lBRed = new LineBorder(Color.RED);

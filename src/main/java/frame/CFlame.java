@@ -3,8 +3,10 @@ package frame;
 import function.Controller;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
@@ -42,47 +44,26 @@ public class CFlame extends JFrame {
         //以下コンポーネントの列挙
 
         mainTM = new DefaultTableModel(controller.convert(), COLUMN_NAMES) {
-            /**
-             * ソートのための型指定
-             *
-             * @param columnIndex the column being queried
-             * @return セルの内容
-             */
+
+            //ソートのための型指定
             @Override
             public Class<?> getColumnClass(int columnIndex) {
                 switch (columnIndex) {
-                    case 0:
-                        return String.class;
-                    case 1:
-                        return Integer.class;
-                    case 2:
-                        return Integer.class;
-                    case 3:
-                        return Integer.class;
-                    case 4:
-                        return Integer.class;
-                    case 5:
-                        return Object.class;
-                    case 6:
-                        return String.class;
-                    case 7:
-                        return String.class;
-                    case 8:
-                        return Integer.class;
-                    case 9:
-                        return Boolean.class;   //チェックボックス化
-                    default:
-                        return Object.class;
+                    case 0: return String.class;
+                    case 1: return Integer.class;
+                    case 2: return Integer.class;
+                    case 3: return Integer.class;
+                    case 4: return Integer.class;
+                    case 5: return Object.class;
+                    case 6: return String.class;
+                    case 7: return String.class;
+                    case 8: return Integer.class;
+                    case 9: return Boolean.class;   //チェックボックス化
+                    default: return Object.class;
                 }
             }
 
-            /**
-             * 書き込んだ数値をInteger型で保存
-             *
-             * @param aValue the new value; this can be null
-             * @param row    the row whose value is to be changed
-             * @param column the column whose value is to be changed
-             */
+            //書き込んだ数値をInteger型で保存
             @Override
             public void setValueAt(Object aValue, int row, int column) {
                 if (getColumnClass(column) == Integer.class && aValue instanceof String) {
@@ -96,7 +77,13 @@ public class CFlame extends JFrame {
             }
         };
 
-        JTable table = new JTable(mainTM);
+        JTable table = new JTable(mainTM) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                if (column == 1 || column == 6) return false;
+                return true;
+            }
+        };
         //ソート機能を追加
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(mainTM);
         table.setRowSorter(sorter);
@@ -111,37 +98,52 @@ public class CFlame extends JFrame {
         };
         sorter.setRowFilter(filter);
 
+        //不要列を非表示
         //table.removeColumn(table.getColumnModel().getColumn(9));
         //table.removeColumn(table.getColumnModel().getColumn(8));
-        JScrollPane sp = new JScrollPane(table);
 
-        FlowLayout fLayout = new FlowLayout();
-        fLayout.setAlignment(FlowLayout.LEFT);
+        //列の大きさを設定
+        table.getColumnModel().getColumn(0).setPreferredWidth(200);
+        for (int i = 2; i < 6; i++) {
+            table.getColumnModel().getColumn(i).setPreferredWidth(30);
+        }
+
+        //用途欄をコンボボックスで表示
+        JComboBox purCB = new JComboBox(new String[]{"燃料", "糖分", "その他"});
+        table.getColumnModel().getColumn(5).setCellEditor(new DefaultCellEditor(purCB));
+        //中央揃えで表示
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+        renderer.setHorizontalAlignment(JLabel.CENTER);
+        table.getColumnModel().getColumn(5).setCellRenderer(renderer);
+
+        JScrollPane sp = new JScrollPane(table);
 
         JButton newB = new JButton("商品追加");
         JButton removeB = new JButton("削除");
         JButton allB = new JButton("すべて表示");
+        JButton cosB = new JButton("コスパ計算");
         JCheckBox perCB = new JCheckBox();
-        JPanel p1 = new JPanel(fLayout);
+        JPanel p1 = new JPanel();
+        p1.setBorder(new EmptyBorder(3, 3, 3, 3));
+        p1.setLayout(new BoxLayout(p1, BoxLayout.X_AXIS));
         Box bRB = Box.createHorizontalBox();
         bRB.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         bRB.add(removeB);
         bRB.add(perCB);
-        //コンポーネントの配置
-        p1.add(newB);
-        p1.add(bRB);
-        p1.add(allB);
+        //コンポーネントの配置(表示上の並び)
+        p1.add(newB); p1.add(Box.createHorizontalStrut(15)); p1.add(bRB); p1.add(Box.createHorizontalStrut(15)); p1.add(allB); p1.add(Box.createGlue()); p1.add(cosB);
 
+
+        table.getTableHeader().setReorderingAllowed(false);     //列入れ替えを不可に
         //列ごとにバリデーションを設定
-        table.getTableHeader().setReorderingAllowed(false);
-
         JTextField strTF = new JTextField();
         JTextField intTF = new JTextField();
         strTF.setInputVerifier(inputStr);
         intTF.setInputVerifier(inputInt);
         int[] strCs = {0, 7};
         int[] intCs = {2, 3, 4};
-        DefaultCellEditor strCE = new DefaultCellEditor(strTF) {    //エディターの入力可能判定をオーバーライドして追加
+        //エディターの入力可能判定をオーバーライドして追加
+        DefaultCellEditor strCE = new DefaultCellEditor(strTF) {
             @Override
             public boolean stopCellEditing() {
                 if (!strTF.getInputVerifier().verify(strTF)) return false;
@@ -197,7 +199,12 @@ public class CFlame extends JFrame {
                             break;
                         }
                         case 5:
-                            controller.editPurposeDB((Integer) mainTM.getValueAt(row, 8), (Integer) o);
+                            int p = 3;
+                            switch (mainTM.getValueAt(row, 5).toString()) {
+                                case "燃料" -> p = 1;
+                                case "糖分" -> p = 2;
+                            }
+                            controller.editPurposeDB((Integer) mainTM.getValueAt(row, 8), p);
                             break;
                         case 7:
                             controller.editUrlDB((Integer) mainTM.getValueAt(row, 8), (String) o);
@@ -225,8 +232,10 @@ public class CFlame extends JFrame {
                     mainTM.setValueAt(true, modelRows[i], 9);
                     controller.deleteDB((Integer) mainTM.getValueAt(modelRows[i], 8));
                 }
-                //再フィルター
-                sorter.sort();
+
+                perCB.setSelected(false);
+
+                sorter.sort();  //再フィルター
 
             }
         });
@@ -249,6 +258,13 @@ public class CFlame extends JFrame {
             NDialog nDialog = new NDialog(this);
             nDialog.setLocationRelativeTo(this);
             nDialog.setVisible(true);
+        });
+
+        //コスパ計算ボタンアクション
+        cosB.addActionListener(e -> {
+            CalcFlame calcFlame = new CalcFlame(this);
+            calcFlame.setLocationRelativeTo(this);
+            calcFlame.setVisible(true);
         });
 
         //メインフレームへの追加
