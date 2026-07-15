@@ -2,21 +2,29 @@ package frame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 
 public class CalcFlame extends JFrame {
 
     public CalcFlame(CFlame owner) {
 
+        BorderLayout borderL = new BorderLayout();
         SpringLayout spL = new SpringLayout();
-        GridLayout gL = new GridLayout(5, 4);
+        GridLayout gridL = new GridLayout(5, 4);
         Font lF = new Font(Font.DIALOG, Font.PLAIN, 25);
 
-        JPanel lP = new JPanel(spL);
-        JPanel cP = new JPanel();
-        JPanel cbP = new JPanel(gL);
-        JPanel cdP = new JPanel();
-        JPanel crP = new JPanel();
+        JPanel leftP = new JPanel(spL);
+        JPanel centerP = new JPanel(borderL);
+        JPanel centerBtnP = new JPanel(gridL);
+        JPanel centerDispP = new JPanel();
+        centerDispP.setLayout(new BoxLayout(centerDispP, BoxLayout.Y_AXIS));
+        JPanel centerRecP = new JPanel();
+        JPanel recLayerP = new JPanel();
 
+
+
+
+        //leftPコンポーネント
         JTextField calT = new JTextField("11111");
         calT.setFont(lF);
         JLabel calL = new JLabel("kcal");
@@ -30,26 +38,51 @@ public class CalcFlame extends JFrame {
         cspTF.setFont(lF);
         JLabel cspL = new JLabel("コスパ");
         JButton newB = new JButton("登録");
-
-        JLabel dsL = new JLabel();
-        JLabel dmL = new JLabel();
-
-        JButton bC = new JButton("C"); JButton bX = new JButton("<X"); JButton bW = new JButton("÷");
-        JButton b7 = new JButton("7"); JButton b8 = new JButton("8"); JButton b9 = new JButton("9"); JButton bK = new JButton("×");
-        JButton b4 = new JButton("4"); JButton b5 = new JButton("5"); JButton b6 = new JButton("6"); JButton bH = new JButton("-");
-        JButton b1 = new JButton("1"); JButton b2 = new JButton("2"); JButton b3 = new JButton("3"); JButton bT = new JButton("+");
-                                            JButton b0 = new JButton("0"); JButton bS = new JButton("."); JButton bI = new JButton("=");
-
         JToggleButton calTB = new JToggleButton("gggggg");
         JToggleButton cosTB = new JToggleButton("gggggg");
 
+        //centerPコンポーネント
+        JLabel dispSubL = new JLabel("55555555");
+        JLabel dispMainL = new JLabel("66666666666");
+
+        var cV = new Object() {
+            int calcValue;
+        };
+
+        JButton bN1 = new JButton(""); JButton bC = new JButton("C"); JButton bX = new JButton("<X"); JButton bW = new JButton("÷");
+        JButton b7 = new JButton("7"); JButton b8 = new JButton("8"); JButton b9 = new JButton("9"); JButton bK = new JButton("×");
+        JButton b4 = new JButton("4"); JButton b5 = new JButton("5"); JButton b6 = new JButton("6"); JButton bH = new JButton("-");
+        JButton b1 = new JButton("1"); JButton b2 = new JButton("2"); JButton b3 = new JButton("3"); JButton bT = new JButton("+");
+        JButton bN2 = new JButton(""); JButton b0 = new JButton("0"); JButton bS = new JButton("."); JButton bI = new JButton("=");
+
+        JButton[] btns = {bN1, bC, bX, bW, b7, b8, b9, bK, b4, b5, b6, bH, b1, b2, b3, bT, bN2, b0, bS, bI};
+        Arrays.stream(btns).forEach(b -> {
+            b.addActionListener(e -> {
+                switch (b.getText()) {
+                    case "C" -> ;
+                    case "<X" -> ;
+                    case "÷" -> ;
+                    case "×" -> ;
+                    case "-" -> ;
+                    case "+" -> ;
+                    case "." -> ;
+                    case "=" -> ;
+                    default -> cV.calcValue = Integer.parseInt(b.getText());
+                }
+            });
+        });
+
+
+
+
+
         //lPサイズ設定
-        spL.putConstraint(SpringLayout.SOUTH, lP, 600, SpringLayout.NORTH, lP);
-        spL.putConstraint(SpringLayout.EAST, lP, 600, SpringLayout.WEST, lP);
+        spL.putConstraint(SpringLayout.SOUTH, leftP, 600, SpringLayout.NORTH, leftP);
+        spL.putConstraint(SpringLayout.EAST, leftP, 600, SpringLayout.WEST, leftP);
 
         //lPコンポーネント配置設定
-        spL.putConstraint(SpringLayout.NORTH, calT, 30, SpringLayout.NORTH, lP);
-        spL.putConstraint(SpringLayout.WEST, calT, 20, SpringLayout.WEST, lP);
+        spL.putConstraint(SpringLayout.NORTH, calT, 30, SpringLayout.NORTH, leftP);
+        spL.putConstraint(SpringLayout.WEST, calT, 20, SpringLayout.WEST, leftP);
 
         spL.putConstraint(SpringLayout.SOUTH, calTB, 0, SpringLayout.NORTH, calT);
         spL.putConstraint(SpringLayout.EAST, calTB, -1, SpringLayout.EAST, calT);
@@ -72,13 +105,20 @@ public class CalcFlame extends JFrame {
 
 
 
+        //コンポーネントの配置
+        leftP.add(calTB); leftP.add(cosTB);
+        leftP.add(calT); leftP.add(cosT); leftP.add(numT);
+        leftP.add(cspTF);
+        leftP.add(newB);
 
-        lP.add(calTB); lP.add(cosTB);
-        lP.add(calT); lP.add(cosT); lP.add(numT);
-        lP.add(cspTF);
-        lP.add(newB);
+        centerDispP.add(dispMainL);
+        centerDispP.add(dispSubL);
 
-        add(lP, BorderLayout.WEST); add(cP, BorderLayout.CENTER);
+
+        centerP.add(centerDispP, BorderLayout.NORTH);
+        centerP.add(centerBtnP, BorderLayout.CENTER); centerP.add(centerRecP, BorderLayout.EAST);
+
+        add(leftP, BorderLayout.WEST); add(centerP, BorderLayout.CENTER);
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         pack();
