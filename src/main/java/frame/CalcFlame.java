@@ -46,10 +46,11 @@ public class CalcFlame extends JFrame {
         JLabel dispMainL = new JLabel("66666666666");
 
         var cV = new Object() {
-            int calcValue;
+            StringBuffer calcIn;
+            String calcSubS;
         };
 
-        JButton bN1 = new JButton(""); JButton bC = new JButton("C"); JButton bX = new JButton("<X"); JButton bW = new JButton("÷");
+        JButton bN1 = new JButton("C"); JButton bC = new JButton("CE"); JButton bX = new JButton("<X"); JButton bW = new JButton("÷");
         JButton b7 = new JButton("7"); JButton b8 = new JButton("8"); JButton b9 = new JButton("9"); JButton bK = new JButton("×");
         JButton b4 = new JButton("4"); JButton b5 = new JButton("5"); JButton b6 = new JButton("6"); JButton bH = new JButton("-");
         JButton b1 = new JButton("1"); JButton b2 = new JButton("2"); JButton b3 = new JButton("3"); JButton bT = new JButton("+");
@@ -59,15 +60,19 @@ public class CalcFlame extends JFrame {
         Arrays.stream(btns).forEach(b -> {
             b.addActionListener(e -> {
                 switch (b.getText()) {
-                    case "C" -> ;
-                    case "<X" -> ;
-                    case "÷" -> ;
-                    case "×" -> ;
-                    case "-" -> ;
-                    case "+" -> ;
+                    case "C" -> {
+                        cV.calcIn = 0;
+                        cV.calcSubS = "";
+                    }
+                    case "CE" -> cV.calcIn.delete(0, cV.calcIn.length() -1);
+                    case "<X" -> cV.calcIn.deleteCharAt(cV.calcIn.length() - 1);
+                    case "÷" -> cV.calcSubS = cV.calcIn + "÷";
+                    case "×" -> cV.calcSubS = cV.calcIn + "×";
+                    case "-" -> cV.calcSubS = cV.calcIn + "-";
+                    case "+" -> cV.calcSubS = cV.calcIn + "+";
                     case "." -> ;
-                    case "=" -> ;
-                    default -> cV.calcValue = Integer.parseInt(b.getText());
+                    case "=" -> cV.calcSubS = String.valueOf(cV.calcIn);
+                    default -> cV.calcIn.append(b.getText());
                 }
             });
         });
