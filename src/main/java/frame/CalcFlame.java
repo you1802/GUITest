@@ -2,7 +2,10 @@ package frame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 public class CalcFlame extends JFrame {
 
@@ -47,7 +50,8 @@ public class CalcFlame extends JFrame {
 
         var cV = new Object() {
             StringBuffer calcIn;
-            String calcSubS;
+            StringBuffer calcSubS;
+            String calcLog;
         };
 
         JButton bN1 = new JButton("C"); JButton bC = new JButton("CE"); JButton bX = new JButton("<X"); JButton bW = new JButton("÷");
@@ -61,16 +65,30 @@ public class CalcFlame extends JFrame {
             b.addActionListener(e -> {
                 switch (b.getText()) {
                     case "C" -> {
-                        cV.calcIn = 0;
-                        cV.calcSubS = "";
+                        cV.calcIn.delete(0, cV.calcIn.length());
+                        cV.calcSubS.delete(0, cV.calcIn.length());
                     }
-                    case "CE" -> cV.calcIn.delete(0, cV.calcIn.length() -1);
-                    case "<X" -> cV.calcIn.deleteCharAt(cV.calcIn.length() - 1);
-                    case "÷" -> cV.calcSubS = cV.calcIn + "÷";
-                    case "×" -> cV.calcSubS = cV.calcIn + "×";
-                    case "-" -> cV.calcSubS = cV.calcIn + "-";
-                    case "+" -> cV.calcSubS = cV.calcIn + "+";
-                    case "." -> ;
+                    case "CE" -> cV.calcIn.delete(0, cV.calcIn.length());
+                    case "<X" -> cV.calcIn.deleteCharAt(cV.calcIn.length());
+                    case "÷" -> {
+                        if (cV.calcSubS.isEmpty()) {
+                            cV.calcSubS.append(cV.calcIn).append("÷");
+                        }
+
+                    }
+                    case "×" -> cV.calcSubS = cV.calcIn.toString() + "×";
+                    case "-" -> cV.calcSubS = cV.calcIn.toString() + "-";
+                    case "+" -> cV.calcSubS = cV.calcIn.toString() + "+";
+                    case "." -> {
+                        if (cV.calcIn.isEmpty()) {
+                            cV.calcIn.append(0).append(".");
+                        }else {
+                            if(cV.calcIn.indexOf(".") == -1) {
+                                cV.calcIn.append(".");
+                            }
+                        }
+                        cV.calcIn.append(".");
+                    }
                     case "=" -> cV.calcSubS = String.valueOf(cV.calcIn);
                     default -> cV.calcIn.append(b.getText());
                 }
@@ -127,6 +145,57 @@ public class CalcFlame extends JFrame {
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         pack();
+    }
+
+    private void calcAddSymbol(StringBuilder in, StringBuilder subD, String log, String synbol) {
+        if (in.isEmpty()){
+            if (!subD.isEmpty()) subD.replace(subD.length() - 1, subD.length(), synbol);    //演算子を入れ替える
+        }else {
+            if (subD.isEmpty()) {
+                //入力値に演算子を足してsubDへ移動
+                subD.append(in).append(synbol);
+                in.setLength(0);
+            }else {
+                //未完成
+                calcPushEqual(in, subD, log);
+            }
+        }
+
+    }
+
+    private void calcPushEqual(StringBuilder in, StringBuilder subD, String log) {
+        Pattern p = Pattern.compile("\\D$");
+
+        if (p.matcher(subD.toString()).find() && !in.isEmpty()) {   //subDに記号が追加済みでinに入力済みのとき
+            //inの末尾に小数点が入っていれば削除
+            if (p.matcher(in.toString()).find()) {
+                in.deleteCharAt(in.length());
+            }
+            //計算してlogに入れる
+            switch (subD.charAt(subD.length())) {
+                case '÷' -> {
+                    subD.append(in).append("=");
+                    in.replace(0, in.length(), new  BigDecimal(subD.substring(0, subD.length() - 1)).divide(new BigDecimal(in.toString()), 2, RoundingMode.HALF_UP).toString());
+                    log = subD + "  " + in;
+                }
+                case '×' -> {
+                    subD.append(in).append("=");
+                    in.replace(0, in.length(), new  BigDecimal(subD.substring(0, subD.length() - 1)).multiply(new BigDecimal(in.toString())).toString());
+                    log = subD + "  " + in;
+                }
+                case '+' -> {
+                    subD.append(in).append("=");
+                    in.replace(0, in.length(), new  BigDecimal(subD.substring(0, subD.length() - 1)).add(new BigDecimal(in.toString())).toString());
+                    log = subD + "  " + in;
+                }
+                case '-' -> {
+                    subD.append(in).append("=");
+                    in.replace(0, in.length(), new  BigDecimal(subD.substring(0, subD.length() - 1)).subtract(new BigDecimal(in.toString())).toString());
+                    log = subD + "  " + in;
+                }
+
+            }
+        }
     }
 
 }
