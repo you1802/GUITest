@@ -148,19 +148,28 @@ public class CalcFlame extends JFrame {
     }
 
     private void calcAddSymbol(StringBuilder in, StringBuilder subD, String log, String synbol) {
-        if (in.isEmpty()){
-            if (!subD.isEmpty()) subD.replace(subD.length() - 1, subD.length(), synbol);    //演算子を入れ替える
-        }else {
-            if (subD.isEmpty()) {
+        if (in.isEmpty()) {
+            if (!subD.isEmpty()) subD.replace(subD.length() - 1, subD.length(), synbol);    //inなしsubあり　演算子を入れ替える
+        } else {
+            if (subD.isEmpty()) {       //inありsubなし
                 //入力値に演算子を足してsubDへ移動
                 subD.append(in).append(synbol);
                 in.setLength(0);
-            }else {
+            } else {     //inありsubあり
                 //未完成
-                calcPushEqual(in, subD, log);
+                if (subD.charAt(subD.length()) == '=') {    //subに＝があるとき
+                    //inに演算子を足してsubへ移動
+                    subD.replace(0, subD.length(), in + synbol);
+                    in.setLength(0);
+                } else {    //sub末尾が=以外の演算子のとき
+                    //計算した答えに演算子を足してsubに移動
+                    calcPushEqual(in, subD, log);
+                    subD.replace(0, subD.length(), in + synbol);
+                    in.setLength(0);
+                }
             }
-        }
 
+        }
     }
 
     private void calcPushEqual(StringBuilder in, StringBuilder subD, String log) {
@@ -193,6 +202,7 @@ public class CalcFlame extends JFrame {
                     in.replace(0, in.length(), new  BigDecimal(subD.substring(0, subD.length() - 1)).subtract(new BigDecimal(in.toString())).toString());
                     log = subD + "  " + in;
                 }
+                default -> {}
 
             }
         }
