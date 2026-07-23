@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class CalcFlame extends JFrame {
+    DefaultListModel<String> logModel = new DefaultListModel<>();
 
     public CalcFlame(CFlame owner) {
 
@@ -21,9 +22,8 @@ public class CalcFlame extends JFrame {
         JPanel centerBtnP = new JPanel(gridL);
         JPanel centerDispP = new JPanel();
         centerDispP.setLayout(new BoxLayout(centerDispP, BoxLayout.Y_AXIS));
+        centerDispP.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         JPanel centerRecP = new JPanel();
-        JPanel recLayerP = new JPanel();
-
 
 
 
@@ -46,21 +46,29 @@ public class CalcFlame extends JFrame {
 
         //centerPコンポーネント
         JLabel dispSubL = new JLabel("55555555");
-        JLabel dispMainL = new JLabel("66666666666");
+        dispSubL.setPreferredSize(new Dimension(12, 100));
+        dispSubL.setHorizontalAlignment(JLabel.RIGHT);
+        JLabel dispInL = new JLabel("66666666666");
+        dispInL.setPreferredSize(new Dimension(12, 100));
+        dispInL.setHorizontalAlignment(JLabel.RIGHT);
+        JList<String> dispLogL = new JList<>(logModel);
 
+
+
+        //電卓用変数
         var cV = new Object() {
-            StringBuffer calcIn;
-            StringBuffer calcSubS;
-            String calcLog;
+            StringBuilder calcIn = new StringBuilder();
+            StringBuilder calcSubS = new StringBuilder();
+            String calcLog = "";
         };
 
-        JButton bN1 = new JButton("C"); JButton bC = new JButton("CE"); JButton bX = new JButton("<X"); JButton bW = new JButton("÷");
+        JButton bC = new JButton("C"); JButton bCE = new JButton("CE"); JButton bX = new JButton("<X"); JButton bW = new JButton("÷");
         JButton b7 = new JButton("7"); JButton b8 = new JButton("8"); JButton b9 = new JButton("9"); JButton bK = new JButton("×");
         JButton b4 = new JButton("4"); JButton b5 = new JButton("5"); JButton b6 = new JButton("6"); JButton bH = new JButton("-");
         JButton b1 = new JButton("1"); JButton b2 = new JButton("2"); JButton b3 = new JButton("3"); JButton bT = new JButton("+");
-        JButton bN2 = new JButton(""); JButton b0 = new JButton("0"); JButton bS = new JButton("."); JButton bI = new JButton("=");
+        JButton bN1 = new JButton(""); JButton b0 = new JButton("0"); JButton bS = new JButton("."); JButton bI = new JButton("=");
 
-        JButton[] btns = {bN1, bC, bX, bW, b7, b8, b9, bK, b4, b5, b6, bH, b1, b2, b3, bT, bN2, b0, bS, bI};
+        JButton[] btns = {bC, bCE, bX, bW, b7, b8, b9, bK, b4, b5, b6, bH, b1, b2, b3, bT, bN1, b0, bS, bI};
         Arrays.stream(btns).forEach(b -> {
             b.addActionListener(e -> {
                 switch (b.getText()) {
@@ -69,16 +77,11 @@ public class CalcFlame extends JFrame {
                         cV.calcSubS.delete(0, cV.calcIn.length());
                     }
                     case "CE" -> cV.calcIn.delete(0, cV.calcIn.length());
-                    case "<X" -> cV.calcIn.deleteCharAt(cV.calcIn.length());
-                    case "÷" -> {
-                        if (cV.calcSubS.isEmpty()) {
-                            cV.calcSubS.append(cV.calcIn).append("÷");
-                        }
-
-                    }
-                    case "×" -> cV.calcSubS = cV.calcIn.toString() + "×";
-                    case "-" -> cV.calcSubS = cV.calcIn.toString() + "-";
-                    case "+" -> cV.calcSubS = cV.calcIn.toString() + "+";
+                    case "<X" -> cV.calcIn.deleteCharAt(cV.calcIn.length() - 1);
+                    case "÷" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, "÷");
+                    case "×" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, "×");
+                    case "-" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, "-");
+                    case "+" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, "+");
                     case "." -> {
                         if (cV.calcIn.isEmpty()) {
                             cV.calcIn.append(0).append(".");
@@ -87,14 +90,14 @@ public class CalcFlame extends JFrame {
                                 cV.calcIn.append(".");
                             }
                         }
-                        cV.calcIn.append(".");
                     }
-                    case "=" -> cV.calcSubS = String.valueOf(cV.calcIn);
+                    case "=" -> calcPushEqual(cV.calcIn, cV.calcSubS, cV.calcLog);
                     default -> cV.calcIn.append(b.getText());
                 }
+                dispInL.setText(cV.calcIn.toString());
+                dispSubL.setText(cV.calcSubS.toString());
             });
         });
-
 
 
 
@@ -134,19 +137,30 @@ public class CalcFlame extends JFrame {
         leftP.add(cspTF);
         leftP.add(newB);
 
-        centerDispP.add(dispMainL);
         centerDispP.add(dispSubL);
+        centerDispP.add(dispInL);
 
+        Arrays.stream(btns).forEach(centerBtnP::add);
+
+        centerRecP.add(dispLogL);
 
         centerP.add(centerDispP, BorderLayout.NORTH);
         centerP.add(centerBtnP, BorderLayout.CENTER); centerP.add(centerRecP, BorderLayout.EAST);
 
         add(leftP, BorderLayout.WEST); add(centerP, BorderLayout.CENTER);
 
+        //ウィンドウ設定
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         pack();
     }
 
+    /**
+     * ＝以外の演算子を押したときの処理
+     * @param in
+     * @param subD
+     * @param log
+     * @param synbol
+     */
     private void calcAddSymbol(StringBuilder in, StringBuilder subD, String log, String synbol) {
         if (in.isEmpty()) {
             if (!subD.isEmpty()) subD.replace(subD.length() - 1, subD.length(), synbol);    //inなしsubあり　演算子を入れ替える
@@ -157,7 +171,7 @@ public class CalcFlame extends JFrame {
                 in.setLength(0);
             } else {     //inありsubあり
                 //未完成
-                if (subD.charAt(subD.length()) == '=') {    //subに＝があるとき
+                if (subD.charAt(subD.length() - 1) == '=') {    //subに＝があるとき
                     //inに演算子を足してsubへ移動
                     subD.replace(0, subD.length(), in + synbol);
                     in.setLength(0);
@@ -172,39 +186,43 @@ public class CalcFlame extends JFrame {
         }
     }
 
+    /**
+     * ＝を押したときの処理
+     * @param in
+     * @param subD
+     * @param log
+     */
     private void calcPushEqual(StringBuilder in, StringBuilder subD, String log) {
         Pattern p = Pattern.compile("\\D$");
+        BigDecimal result;
 
         if (p.matcher(subD.toString()).find() && !in.isEmpty()) {   //subDに記号が追加済みでinに入力済みのとき
             //inの末尾に小数点が入っていれば削除
             if (p.matcher(in.toString()).find()) {
-                in.deleteCharAt(in.length());
+                in.deleteCharAt(in.length() - 1);
             }
             //計算してlogに入れる
-            switch (subD.charAt(subD.length())) {
+            switch (subD.charAt(subD.length() - 1)) {
                 case '÷' -> {
-                    subD.append(in).append("=");
-                    in.replace(0, in.length(), new  BigDecimal(subD.substring(0, subD.length() - 1)).divide(new BigDecimal(in.toString()), 2, RoundingMode.HALF_UP).toString());
-                    log = subD + "  " + in;
+                    result = new  BigDecimal(subD.substring(0, subD.length() - 1)).divide(new BigDecimal(in.toString()), 2, RoundingMode.HALF_UP);
                 }
                 case '×' -> {
-                    subD.append(in).append("=");
-                    in.replace(0, in.length(), new  BigDecimal(subD.substring(0, subD.length() - 1)).multiply(new BigDecimal(in.toString())).toString());
-                    log = subD + "  " + in;
+                    result = new  BigDecimal(subD.substring(0, subD.length() - 1)).multiply(new BigDecimal(in.toString()));
                 }
                 case '+' -> {
-                    subD.append(in).append("=");
-                    in.replace(0, in.length(), new  BigDecimal(subD.substring(0, subD.length() - 1)).add(new BigDecimal(in.toString())).toString());
-                    log = subD + "  " + in;
+                    result = new  BigDecimal(subD.substring(0, subD.length() - 1)).add(new BigDecimal(in.toString()));
                 }
                 case '-' -> {
-                    subD.append(in).append("=");
-                    in.replace(0, in.length(), new  BigDecimal(subD.substring(0, subD.length() - 1)).subtract(new BigDecimal(in.toString())).toString());
-                    log = subD + "  " + in;
+                    result = new  BigDecimal(subD.substring(0, subD.length() - 1)).subtract(new BigDecimal(in.toString()));
                 }
-                default -> {}
-
+                default -> {return;}
             }
+            subD.append(in).append("=");
+            in.replace(0, in.length(), result.toString());
+            log = subD + "  " + in;
+
+            logModel.add(0, log);
+
         }
     }
 
