@@ -1,6 +1,8 @@
 package frame;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -16,6 +18,8 @@ public class CalcFlame extends JFrame {
         SpringLayout spL = new SpringLayout();
         GridLayout gridL = new GridLayout(5, 4);
         Font lF = new Font(Font.DIALOG, Font.PLAIN, 25);
+        LineBorder bd = new LineBorder(Color.LIGHT_GRAY);
+        Dimension labelSize = new Dimension(200, 16);
 
         JPanel leftP = new JPanel(spL);
         JPanel centerP = new JPanel(borderL);
@@ -45,12 +49,20 @@ public class CalcFlame extends JFrame {
         JToggleButton cosTB = new JToggleButton("gggggg");
 
         //centerPコンポーネント
-        JLabel dispSubL = new JLabel("55555555");
-        dispSubL.setPreferredSize(new Dimension(12, 100));
+        JLabel dispSubL = new JLabel();
+        //dispSubL.setPreferredSize(new Dimension(200, 16));
+        dispSubL.setMinimumSize(labelSize);
+        dispSubL.setMinimumSize(labelSize);
         dispSubL.setHorizontalAlignment(JLabel.RIGHT);
-        JLabel dispInL = new JLabel("66666666666");
-        dispInL.setPreferredSize(new Dimension(12, 100));
+        dispSubL.setBorder(bd);
+        dispSubL.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        JLabel dispInL = new JLabel();
+        //dispInL.setPreferredSize(new Dimension(200, 16));
+        dispInL.setMinimumSize(labelSize);
+        dispInL.setMaximumSize(labelSize);
         dispInL.setHorizontalAlignment(JLabel.RIGHT);
+        dispInL.setBorder(bd);
+        dispInL.setAlignmentX(Component.RIGHT_ALIGNMENT);
         JList<String> dispLogL = new JList<>(logModel);
 
 
@@ -60,6 +72,7 @@ public class CalcFlame extends JFrame {
             StringBuilder calcIn = new StringBuilder();
             StringBuilder calcSubS = new StringBuilder();
             String calcLog = "";
+            boolean[] b = {false};  //参照を渡すため配列にする
         };
 
         JButton bC = new JButton("C"); JButton bCE = new JButton("CE"); JButton bX = new JButton("<X"); JButton bW = new JButton("÷");
@@ -73,15 +86,15 @@ public class CalcFlame extends JFrame {
             b.addActionListener(e -> {
                 switch (b.getText()) {
                     case "C" -> {
-                        cV.calcIn.delete(0, cV.calcIn.length());
-                        cV.calcSubS.delete(0, cV.calcIn.length());
+                        cV.calcIn.setLength(0);
+                        cV.calcSubS.setLength(0);
                     }
-                    case "CE" -> cV.calcIn.delete(0, cV.calcIn.length());
+                    case "CE" -> cV.calcIn.setLength(0);
                     case "<X" -> cV.calcIn.deleteCharAt(cV.calcIn.length() - 1);
-                    case "÷" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, "÷");
-                    case "×" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, "×");
-                    case "-" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, "-");
-                    case "+" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, "+");
+                    case "÷" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, cV.b, "÷");
+                    case "×" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, cV.b, "×");
+                    case "-" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, cV.b, "-");
+                    case "+" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, cV.b, "+");
                     case "." -> {
                         if (cV.calcIn.isEmpty()) {
                             cV.calcIn.append(0).append(".");
@@ -91,8 +104,14 @@ public class CalcFlame extends JFrame {
                             }
                         }
                     }
-                    case "=" -> calcPushEqual(cV.calcIn, cV.calcSubS, cV.calcLog);
-                    default -> cV.calcIn.append(b.getText());
+                    case "=" -> calcPushEqual(cV.calcIn, cV.calcSubS, cV.calcLog, cV.b);
+                    default -> {
+                        if (cV.b[0]) {     //答えが残っているとき、クリアしてから入力
+                            cV.calcIn.setLength(0);
+                            cV.b[0] = false;
+                        }
+                        cV.calcIn.append(b.getText());
+                    }
                 }
                 dispInL.setText(cV.calcIn.toString());
                 dispSubL.setText(cV.calcSubS.toString());
@@ -159,9 +178,10 @@ public class CalcFlame extends JFrame {
      * @param in
      * @param subD
      * @param log
+     * @param b
      * @param synbol
      */
-    private void calcAddSymbol(StringBuilder in, StringBuilder subD, String log, String synbol) {
+    private void calcAddSymbol(StringBuilder in, StringBuilder subD, String log, boolean[] b, String synbol) {
         if (in.isEmpty()) {
             if (!subD.isEmpty()) subD.replace(subD.length() - 1, subD.length(), synbol);    //inなしsubあり　演算子を入れ替える
         } else {
@@ -177,13 +197,13 @@ public class CalcFlame extends JFrame {
                     in.setLength(0);
                 } else {    //sub末尾が=以外の演算子のとき
                     //計算した答えに演算子を足してsubに移動
-                    calcPushEqual(in, subD, log);
+                    calcPushEqual(in, subD, log, b);
                     subD.replace(0, subD.length(), in + synbol);
                     in.setLength(0);
                 }
             }
-
         }
+        b[0] = false;
     }
 
     /**
@@ -191,8 +211,9 @@ public class CalcFlame extends JFrame {
      * @param in
      * @param subD
      * @param log
+     * @param b
      */
-    private void calcPushEqual(StringBuilder in, StringBuilder subD, String log) {
+    private void calcPushEqual(StringBuilder in, StringBuilder subD, String log, boolean[] b) {
         Pattern p = Pattern.compile("\\D$");
         BigDecimal result;
 
@@ -220,6 +241,7 @@ public class CalcFlame extends JFrame {
             subD.append(in).append("=");
             in.replace(0, in.length(), result.toString());
             log = subD + "  " + in;
+            b[0] = true;
 
             logModel.add(0, log);
 
