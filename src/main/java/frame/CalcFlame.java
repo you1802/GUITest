@@ -1,12 +1,15 @@
 package frame;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CalcFlame extends JFrame {
@@ -14,18 +17,17 @@ public class CalcFlame extends JFrame {
 
     public CalcFlame(CFlame owner) {
 
-        BorderLayout borderL = new BorderLayout();
         SpringLayout spL = new SpringLayout();
-        GridLayout gridL = new GridLayout(5, 4);
         Font lF = new Font(Font.DIALOG, Font.PLAIN, 25);
         LineBorder bd = new LineBorder(Color.LIGHT_GRAY);
-        Dimension labelSize = new Dimension(200, 16);
+        Dimension dispLSize = new Dimension(200, 16);
 
         JPanel leftP = new JPanel(spL);
-        JPanel centerP = new JPanel(borderL);
-        JPanel centerBtnP = new JPanel(gridL);
-        JPanel centerDispP = new JPanel();
-        centerDispP.setLayout(new BoxLayout(centerDispP, BoxLayout.Y_AXIS));
+        JPanel centerP = new JPanel(new BorderLayout());
+        JPanel centercalcBtnP = new JPanel(new GridLayout(5, 4));
+        JPanel centerTopP = new JPanel(new BorderLayout());
+        JPanel centerBtnP = new JPanel(new GridLayout(2, 0));
+        JPanel centerDispP = new JPanel(new GridLayout(2, 0));
         centerDispP.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         JPanel centerRecP = new JPanel();
 
@@ -45,25 +47,82 @@ public class CalcFlame extends JFrame {
         cspTF.setFont(lF);
         JLabel cspL = new JLabel("コスパ");
         JButton newB = new JButton("登録");
-        JToggleButton calTB = new JToggleButton("gggggg");
-        JToggleButton cosTB = new JToggleButton("gggggg");
+        JToggleButton calTB = new JToggleButton("calggg");
+        JToggleButton cosTB = new JToggleButton("costgg");
+
+        DocumentListener txtFldListener = new DocumentListener() {
+            private void update() {
+                int cal = Integer.parseInt(calT.getText());
+                int cos = Integer.parseInt(cosT.getText());
+                int num = Integer.parseInt(numT.getText());
+                cspL.setText();
+            }
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+
+            }
+        };
+
 
         //centerPコンポーネント
-        JLabel dispSubL = new JLabel();
+        JLabel dispSubL = new JLabel(" ");
         //dispSubL.setPreferredSize(new Dimension(200, 16));
-        dispSubL.setMinimumSize(labelSize);
-        dispSubL.setMinimumSize(labelSize);
+//        dispSubL.setMinimumSize(labelSize);
+//        dispSubL.setMaximumSize(labelSize);
         dispSubL.setHorizontalAlignment(JLabel.RIGHT);
         dispSubL.setBorder(bd);
         dispSubL.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        JLabel dispInL = new JLabel();
+
+        JLabel dispInL = new JLabel(" ");
         //dispInL.setPreferredSize(new Dimension(200, 16));
-        dispInL.setMinimumSize(labelSize);
-        dispInL.setMaximumSize(labelSize);
+//        dispInL.setMinimumSize(labelSize);
+//        dispInL.setMaximumSize(labelSize);
         dispInL.setHorizontalAlignment(JLabel.RIGHT);
         dispInL.setBorder(bd);
         dispInL.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
+        JButton toCosTB = new JButton("価格");
+        JButton toCalTB = new JButton("カロリー");
+        toCosTB.setEnabled(false);
+        toCalTB.setEnabled(false);
         JList<String> dispLogL = new JList<>(logModel);
+        Pattern toTBP = Pattern.compile("\\d+$");
+
+        dispLogL.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                boolean b = !dispLogL.isSelectionEmpty();
+                toCosTB.setEnabled(b);
+                toCalTB.setEnabled(b);
+            }
+        });
+
+        toCosTB.addActionListener(b -> {
+            if (!dispLogL.isSelectionEmpty()) {
+                Matcher toTBM = toTBP.matcher(dispLogL.getSelectedValue());
+                toTBM.find();
+                cosT.setText(toTBM.group());
+                dispLogL.clearSelection();
+            }
+        });
+        toCalTB.addActionListener(b -> {
+            if (!dispLogL.isSelectionEmpty()) {
+                Matcher toTBM = toTBP.matcher(dispLogL.getSelectedValue());
+                toTBM.find();
+                calT.setText(toTBM.group());
+                dispLogL.clearSelection();
+            }
+        });
+
 
 
 
@@ -159,12 +218,18 @@ public class CalcFlame extends JFrame {
         centerDispP.add(dispSubL);
         centerDispP.add(dispInL);
 
-        Arrays.stream(btns).forEach(centerBtnP::add);
+        centerBtnP.add(toCalTB);
+        centerBtnP.add(toCosTB);
+
+        Arrays.stream(btns).forEach(centercalcBtnP::add);
 
         centerRecP.add(dispLogL);
 
-        centerP.add(centerDispP, BorderLayout.NORTH);
-        centerP.add(centerBtnP, BorderLayout.CENTER); centerP.add(centerRecP, BorderLayout.EAST);
+        centerTopP.add(centerDispP, BorderLayout.CENTER);
+        centerTopP.add(centerBtnP, BorderLayout.EAST);
+
+        centerP.add(centerTopP, BorderLayout.NORTH);
+        centerP.add(centercalcBtnP, BorderLayout.CENTER); centerP.add(centerRecP, BorderLayout.EAST);
 
         add(leftP, BorderLayout.WEST); add(centerP, BorderLayout.CENTER);
 
