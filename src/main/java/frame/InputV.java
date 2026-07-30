@@ -7,11 +7,14 @@ import java.awt.*;
 //入力判定用のクラスを継承して作成
 class InputV extends InputVerifier {
 
+    public static final InputV IV_STR = new InputV(".+");
+    public static final InputV IV_INT = new InputV("\\d+");
+
     String match;
     LineBorder lBRed = new LineBorder(Color.RED);
     LineBorder lBGray = new LineBorder(Color.GRAY);
 
-    public InputV(String match) {
+    private InputV(String match) {
 
         this.match = match;
     }

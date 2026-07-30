@@ -10,6 +10,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.util.Objects;
 
 public class ADialog extends JDialog {
 
@@ -30,7 +31,7 @@ public class ADialog extends JDialog {
 
                 Component c = super.prepareRenderer(renderer, row, column);     //親の処理を呼ぶ
                 String booleanStr = getModel().getValueAt(convertRowIndexToModel(row), 9).toString();   //削除フラグをStringに変換（ぬるぽ回避のため）
-                if (booleanStr == "true") c.setBackground(Color.LIGHT_GRAY);    //削除フラグがオンならグレーアウト
+                if (Objects.equals(booleanStr, "true")) c.setBackground(Color.LIGHT_GRAY);    //削除フラグがオンならグレーアウト
                 else c.setBackground(getBackground());      //デフォルトを明示的に設定
                 return c;
             }

@@ -5,10 +5,11 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,43 +36,99 @@ public class CalcFlame extends JFrame {
 
         //leftPコンポーネント
         JTextField calT = new JTextField("11111");
+        calT.setInputVerifier(InputV.IV_INT);
         calT.setFont(lF);
         JLabel calL = new JLabel("kcal");
         JTextField cosT = new JTextField("22222");
+        cosT.setInputVerifier(InputV.IV_INT);
         cosT.setFont(lF);
         JLabel cosL = new JLabel("円");
         JTextField numT = new JTextField("3333");
+        numT.setInputVerifier(InputV.IV_INT);
         numT.setFont(lF);
         JLabel numL = new JLabel("個");
         JTextField cspTF = new JTextField("4444");
+        cspTF.setEditable(false);
         cspTF.setFont(lF);
         JLabel cspL = new JLabel("コスパ");
         JButton newB = new JButton("登録");
         JToggleButton calTB = new JToggleButton("calggg");
         JToggleButton cosTB = new JToggleButton("costgg");
 
-        DocumentListener txtFldListener = new DocumentListener() {
-            private void update() {
-                int cal = Integer.parseInt(calT.getText());
-                int cos = Integer.parseInt(cosT.getText());
-                int num = Integer.parseInt(numT.getText());
-                cspL.setText();
+        //簡易計算機処理
+        Runnable valueUpdate = () -> {   //関数型インターフェイスに処理を記載
+            String calStr = calT.getText().trim();
+            String cosStr = cosT.getText().trim();
+            String numStr = numT.getText().trim();
+
+            if (calStr.isEmpty() || cosStr.isEmpty()) {     //未入力があるときコスパクリア
+                cspTF.setText("");
+                return;
             }
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-
+            boolean mixB = calTB.isSelected() ^ cosTB.isSelected();
+            if (mixB) {     //総と個が混ざるとき
+                numT.setEnabled(true);
+                if (numStr.isEmpty()) {     //未入力のときコスパクリア
+                    cspTF.setText("");
+                    return;
+                }
+            } else {     //総のみまたは個のみ
+                numT.setEnabled(false);
             }
+            try {
+                //入力が揃っているとき
+                int cal = Integer.parseInt(calStr);
+                int cos = Integer.parseInt(cosStr);
 
-            @Override
-            public void removeUpdate(DocumentEvent e) {
+                if (cos == 0) {     //ゼロ除算避け
+                    cspTF.setText("");
+                    return;
+                }
+                int result;
 
-            }
+                if (mixB) {     //総と個が混ざるとき
+                    int num = Integer.parseInt(numStr);
+                    result = (cal * 100 * num) / cos;
+                } else {     //総のみまたは個のみ
+                    numT.setEnabled(false);
+                    result = cal * 100 / cos;
+                }
+                cspTF.setText(String.valueOf(result));
 
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-
+            } catch (NumberFormatException e) {
+                cspTF.setText("");
             }
         };
+
+        DocumentListener txtFldListener = new DocumentListener() {      //関数クラスを適用
+            @Override public void insertUpdate(DocumentEvent e) {valueUpdate.run();}
+            @Override public void removeUpdate(DocumentEvent e) {valueUpdate.run();}
+            @Override public void changedUpdate(DocumentEvent e) {valueUpdate.run();}
+        };
+        //リスナーを登録
+        calT.getDocument().addDocumentListener(txtFldListener);
+        cosT.getDocument().addDocumentListener(txtFldListener);
+        numT.getDocument().addDocumentListener(txtFldListener);
+
+        //トグルボタン処理
+        Consumer<ItemEvent> toggleChange = (e) -> {
+            JToggleButton source = (JToggleButton) e.getSource();
+            if (source == calTB) {
+                if (calTB.isSelected()) {
+                    valueUpdate.run();
+                }else {
+                    valueUpdate.run();
+                }
+            } else if (source == cosTB) {
+                if (cosTB.isSelected()) {
+                    valueUpdate.run();
+                }else {
+                    valueUpdate.run();
+                }
+            }
+        };
+        calTB.addItemListener(toggleChange::accept);
+        cosTB.addItemListener(toggleChange::accept);
 
 
         //centerPコンポーネント

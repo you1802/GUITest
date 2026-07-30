@@ -19,16 +19,11 @@ public class CFlame extends JFrame {
     public static CFlame cFlame;
     ADialog aDialog;
     DefaultTableModel mainTM;
-    InputVerifier inputStr;
-    InputVerifier inputInt;
 
     public static final String[] COLUMN_NAMES = {"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL", "id", "削除子"};
     Controller controller = Controller.getInstance();
 
     public CFlame() {
-        inputStr = new InputV(".+");
-        inputInt = new InputV("\\d+");
-
         //メインウィンドウ
         setTitle("amazon");
         setBounds(controller.windowDAO.winX, controller.windowDAO.winY, controller.windowDAO.winWidth, controller.windowDAO.winHeight);
@@ -138,8 +133,8 @@ public class CFlame extends JFrame {
         //列ごとにバリデーションを設定
         JTextField strTF = new JTextField();
         JTextField intTF = new JTextField();
-        strTF.setInputVerifier(inputStr);
-        intTF.setInputVerifier(inputInt);
+        strTF.setInputVerifier(InputV.IV_STR);
+        intTF.setInputVerifier(InputV.IV_INT);
         int[] strCs = {0, 7};
         int[] intCs = {2, 3, 4};
         //エディターの入力可能判定をオーバーライドして追加

@@ -14,8 +14,6 @@ import java.util.Arrays;
 public class NDialog extends JDialog {
 
     CFlame owner;
-    InputVerifier inputStr;
-    InputVerifier inputInt;
     LineBorder lBRed = new LineBorder(Color.RED);
     LineBorder lBBlue = new LineBorder(Color.BLUE);
     LineBorder lBOrange = new LineBorder(Color.ORANGE);
@@ -23,8 +21,6 @@ public class NDialog extends JDialog {
     public NDialog(CFlame owner){
         super(owner, "商品情報入力", true);
         this.owner = owner;
-        inputStr = new InputV(".+");
-        inputInt = new InputV("\\d+");
 
         FlowLayout fLayout = new FlowLayout();
         fLayout.setAlignment(FlowLayout.LEFT);
@@ -54,11 +50,11 @@ public class NDialog extends JDialog {
         JTextField numT = new JTextField(3);
         JTextField[] textFields = {urlT, nameT, calT, cosT, numT};
 
-        urlT.setInputVerifier(inputStr);
-        nameT.setInputVerifier(inputStr);
-        calT.setInputVerifier(inputInt);
-        cosT.setInputVerifier(inputInt);
-        numT.setInputVerifier(inputInt);
+        urlT.setInputVerifier(InputV.IV_STR);
+        nameT.setInputVerifier(InputV.IV_STR);
+        calT.setInputVerifier(InputV.IV_INT);
+        cosT.setInputVerifier(InputV.IV_INT);
+        numT.setInputVerifier(InputV.IV_INT);
 
         JRadioButton purR1 = new JRadioButton("燃料", true);
         purR1.setActionCommand("1");
