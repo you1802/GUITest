@@ -21,25 +21,40 @@ public class CalcFlame extends JFrame {
         SpringLayout spL = new SpringLayout();
         Font lF = new Font(Font.DIALOG, Font.PLAIN, 25);
         LineBorder bd = new LineBorder(Color.LIGHT_GRAY);
-        Dimension dispLSize = new Dimension(200, 16);
+        LineBorder bd2 = new LineBorder(Color.YELLOW);
+        Dimension dispLSize = new Dimension(200, 32);
 
         JPanel leftP = new JPanel(spL);
         JPanel centerP = new JPanel(new BorderLayout());
-        JPanel centercalcBtnP = new JPanel(new GridLayout(5, 4));
+        JPanel centerCalcBtnP = new JPanel(new GridLayout(5, 4));
         JPanel centerTopP = new JPanel(new BorderLayout());
         JPanel centerBtnP = new JPanel(new GridLayout(2, 0));
         JPanel centerDispP = new JPanel(new GridLayout(2, 0));
         centerDispP.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         JPanel centerRecP = new JPanel();
 
+        Dimension btnCPD = new Dimension(230, 340);
+        centerCalcBtnP.setPreferredSize(btnCPD);
+        centerCalcBtnP.setMinimumSize(btnCPD);
+        centerCalcBtnP.setMaximumSize(btnCPD);
+
+        Dimension recPD = new Dimension(130, 340);
+        centerRecP.setPreferredSize(recPD);
+        centerRecP.setMaximumSize(recPD);
+        centerRecP.setMinimumSize(recPD);
+
+
+        leftP.setBorder(bd2);
+        centerP.setBorder(bd);
+
 
 
         //leftPコンポーネント
-        JTextField calT = new JTextField("11111");
+        JTextField calT = new JTextField("111211");
         calT.setInputVerifier(InputV.IV_INT);
         calT.setFont(lF);
         JLabel calL = new JLabel("kcal");
-        JTextField cosT = new JTextField("22222");
+        JTextField cosT = new JTextField("222222");
         cosT.setInputVerifier(InputV.IV_INT);
         cosT.setFont(lF);
         JLabel cosL = new JLabel("円");
@@ -47,7 +62,7 @@ public class CalcFlame extends JFrame {
         numT.setInputVerifier(InputV.IV_INT);
         numT.setFont(lF);
         JLabel numL = new JLabel("個");
-        JTextField cspTF = new JTextField("4444");
+        JTextField cspTF = new JTextField("444444");
         cspTF.setEditable(false);
         cspTF.setFont(lF);
         JLabel cspL = new JLabel("コスパ");
@@ -100,7 +115,7 @@ public class CalcFlame extends JFrame {
             }
         };
 
-        DocumentListener txtFldListener = new DocumentListener() {      //関数クラスを適用
+        DocumentListener txtFldListener = new DocumentListener() {      //関数型インターフェイスを適用
             @Override public void insertUpdate(DocumentEvent e) {valueUpdate.run();}
             @Override public void removeUpdate(DocumentEvent e) {valueUpdate.run();}
             @Override public void changedUpdate(DocumentEvent e) {valueUpdate.run();}
@@ -141,42 +156,54 @@ public class CalcFlame extends JFrame {
         dispSubL.setAlignmentX(Component.RIGHT_ALIGNMENT);
 
         JLabel dispInL = new JLabel(" ");
-        //dispInL.setPreferredSize(new Dimension(200, 16));
-//        dispInL.setMinimumSize(labelSize);
-//        dispInL.setMaximumSize(labelSize);
+        dispInL.setPreferredSize(dispLSize);
+        dispInL.setMinimumSize(dispLSize);
+        dispInL.setMaximumSize(dispLSize);
         dispInL.setHorizontalAlignment(JLabel.RIGHT);
         dispInL.setBorder(bd);
         dispInL.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        dispInL.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 32));
 
         JButton toCosTB = new JButton("価格");
         JButton toCalTB = new JButton("カロリー");
         toCosTB.setEnabled(false);
         toCalTB.setEnabled(false);
-        JList<String> dispLogL = new JList<>(logModel);
-        Pattern toTBP = Pattern.compile("\\d+$");
+        JList<String> dispLogList = new JList<>(logModel);
+        dispLogList.setFixedCellWidth(130);
+        //リストのセルを右詰で表示する
+        dispLogList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public java.awt.Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);   //元の機能を呼ぶ
+                setHorizontalAlignment(JLabel.RIGHT);   //セルのラベルに対して右詰に設定
+                return this;
+            }
+        });
 
-        dispLogL.addListSelectionListener(e -> {
+
+        Pattern toTBP = Pattern.compile("\\d+$");
+        dispLogList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                boolean b = !dispLogL.isSelectionEmpty();
+                boolean b = !dispLogList.isSelectionEmpty();
                 toCosTB.setEnabled(b);
                 toCalTB.setEnabled(b);
             }
         });
 
         toCosTB.addActionListener(b -> {
-            if (!dispLogL.isSelectionEmpty()) {
-                Matcher toTBM = toTBP.matcher(dispLogL.getSelectedValue());
+            if (!dispLogList.isSelectionEmpty()) {
+                Matcher toTBM = toTBP.matcher(dispLogList.getSelectedValue());
                 toTBM.find();
                 cosT.setText(toTBM.group());
-                dispLogL.clearSelection();
+                dispLogList.clearSelection();
             }
         });
         toCalTB.addActionListener(b -> {
-            if (!dispLogL.isSelectionEmpty()) {
-                Matcher toTBM = toTBP.matcher(dispLogL.getSelectedValue());
+            if (!dispLogList.isSelectionEmpty()) {
+                Matcher toTBM = toTBP.matcher(dispLogList.getSelectedValue());
                 toTBM.find();
                 calT.setText(toTBM.group());
-                dispLogL.clearSelection();
+                dispLogList.clearSelection();
             }
         });
 
@@ -198,7 +225,18 @@ public class CalcFlame extends JFrame {
         JButton bN1 = new JButton(""); JButton b0 = new JButton("0"); JButton bS = new JButton("."); JButton bI = new JButton("=");
 
         JButton[] btns = {bC, bCE, bX, bW, b7, b8, b9, bK, b4, b5, b6, bH, b1, b2, b3, bT, bN1, b0, bS, bI};
+        Font btnF = new Font(Font.DIALOG, Font.BOLD, 20);
+        Font btnF2 = new Font(Font.DIALOG, Font.PLAIN, 16);
+        Dimension btnD = new Dimension(60, 65);
         Arrays.stream(btns).forEach(b -> {
+            switch (b.getText()) {
+                case "C", "CE", "<X" -> b.setFont(btnF2);
+                default -> b.setFont(btnF);
+            }
+            b.setPreferredSize(btnD);
+            b.setMinimumSize(btnD);
+            b.setMaximumSize(btnD);
+
             b.addActionListener(e -> {
                 switch (b.getText()) {
                     case "C" -> {
@@ -238,8 +276,8 @@ public class CalcFlame extends JFrame {
 
 
         //lPサイズ設定
-        spL.putConstraint(SpringLayout.SOUTH, leftP, 600, SpringLayout.NORTH, leftP);
-        spL.putConstraint(SpringLayout.EAST, leftP, 600, SpringLayout.WEST, leftP);
+//        spL.putConstraint(SpringLayout.SOUTH, leftP, 600, SpringLayout.NORTH, leftP);
+//        spL.putConstraint(SpringLayout.EAST, leftP, 600, SpringLayout.WEST, leftP);
 
         //lPコンポーネント配置設定
         spL.putConstraint(SpringLayout.NORTH, calT, 30, SpringLayout.NORTH, leftP);
@@ -278,17 +316,19 @@ public class CalcFlame extends JFrame {
         centerBtnP.add(toCalTB);
         centerBtnP.add(toCosTB);
 
-        Arrays.stream(btns).forEach(centercalcBtnP::add);
+        Arrays.stream(btns).forEach(centerCalcBtnP::add);
 
-        centerRecP.add(dispLogL);
+        centerRecP.add(dispLogList);
 
         centerTopP.add(centerDispP, BorderLayout.CENTER);
         centerTopP.add(centerBtnP, BorderLayout.EAST);
 
         centerP.add(centerTopP, BorderLayout.NORTH);
-        centerP.add(centercalcBtnP, BorderLayout.CENTER); centerP.add(centerRecP, BorderLayout.EAST);
+        centerP.add(centerCalcBtnP, BorderLayout.CENTER); centerP.add(centerRecP, BorderLayout.EAST);
 
         add(leftP, BorderLayout.WEST); add(centerP, BorderLayout.CENTER);
+
+        valueUpdate.run();      //生成時計算
 
         //ウィンドウ設定
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
