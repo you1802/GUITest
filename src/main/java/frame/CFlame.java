@@ -16,9 +16,9 @@ import java.util.Arrays;
 
 public class CFlame extends JFrame {
 
-    public static CFlame cFlame;
-    ADialog aDialog;
-    DefaultTableModel mainTM;
+    public static  CFlame cFlame;
+    private ADialog aDialog;
+    private final DefaultTableModel mainTM;
 
     public static final String[] COLUMN_NAMES = {"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL", "id", "削除子"};
     Controller controller = Controller.getInstance();
@@ -164,6 +164,28 @@ public class CFlame extends JFrame {
 
                 if (row < 0 || row == TableModelEvent.HEADER_ROW) return; //非選択時何もしない
 
+                //行追加時コスパ計算
+                if (e.getType() == TableModelEvent.INSERT && e.getSource() == table.getModel()) {
+                    TableModelListener listener = this;
+                    //他の処理が終わった後に実行
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            mainTM.removeTableModelListener(listener);
+                            try {
+                                int calory = (Integer) mainTM.getValueAt(row, 3);
+                                int cost = (Integer) mainTM.getValueAt(row, 2);
+                                int number = (Integer) mainTM.getValueAt(row, 4);
+                                int result = (calory * 100 * number) / cost;
+                                mainTM.setValueAt(result, row, 1);
+                            } catch (Exception _) {
+                            } finally {
+                                mainTM.addTableModelListener(listener);
+                            }
+                        }
+                    });
+                }
+
                 //テーブルの変更を検知
                 if (e.getType() == TableModelEvent.UPDATE && e.getSource() == table.getModel()) {
                     Object o = mainTM.getValueAt(row, column);
@@ -205,7 +227,6 @@ public class CFlame extends JFrame {
                             controller.editUrlDB((Integer) mainTM.getValueAt(row, 8), (String) o);
                     }
                 }
-
             }
         });
 

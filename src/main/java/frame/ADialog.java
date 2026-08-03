@@ -14,13 +14,10 @@ import java.util.Objects;
 
 public class ADialog extends JDialog {
 
-    CFlame owner;
-    Controller controller = Controller.getInstance();
-
+    private final Controller controller = Controller.getInstance();
 
     public ADialog(CFlame owner) {
         super(owner, "全件表示", true);
-        this.owner = owner;
 
 
         DefaultTableModel mainTM = owner.getTableModel();

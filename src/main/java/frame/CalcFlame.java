@@ -14,16 +14,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CalcFlame extends JFrame {
-    DefaultListModel<String> logModel = new DefaultListModel<>();
+    private final DefaultListModel<String> logModel = new DefaultListModel<>();
 
     public CalcFlame(CFlame owner) {
 
         SpringLayout spL = new SpringLayout();
-        Font lF = new Font(Font.DIALOG, Font.PLAIN, 25);
+        Font leftTFF = new Font(Font.DIALOG, Font.PLAIN, 25);
+        Font leftLF = new Font(Font.DIALOG, Font.PLAIN, 14);
+        Font leftTitleF = new Font(Font.DIALOG, Font.BOLD, 14);
         LineBorder bd = new LineBorder(Color.LIGHT_GRAY);
         LineBorder bd2 = new LineBorder(Color.YELLOW);
         Dimension dispLSize = new Dimension(200, 32);
 
+        //パネル列挙
         JPanel leftP = new JPanel(spL);
         JPanel centerP = new JPanel(new BorderLayout());
         JPanel centerCalcBtnP = new JPanel(new GridLayout(5, 4));
@@ -50,22 +53,41 @@ public class CalcFlame extends JFrame {
 
 
         //leftPコンポーネント
-        JTextField calT = new JTextField("111211");
+        JTextField calT = new JTextField(6);
         calT.setInputVerifier(InputV.IV_INT);
-        calT.setFont(lF);
+        calT.setHorizontalAlignment(JTextField.RIGHT);
+        calT.setFont(leftTFF);
+        JLabel calTitleL = new JLabel("カロリー");
+        calTitleL.setFont(leftTitleF);
         JLabel calL = new JLabel("kcal");
-        JTextField cosT = new JTextField("222222");
+        calL.setFont(leftLF);
+        JLabel tOrEL1 = new JLabel("Total");
+        tOrEL1.setFont(leftLF);
+        JTextField cosT = new JTextField(6);
         cosT.setInputVerifier(InputV.IV_INT);
-        cosT.setFont(lF);
+        cosT.setHorizontalAlignment(JTextField.RIGHT);
+        cosT.setFont(leftTFF);
+        JLabel cosTitleL = new JLabel("価格");
+        cosTitleL.setFont(leftTitleF);
         JLabel cosL = new JLabel("円");
-        JTextField numT = new JTextField("3333");
+        cosL.setFont(leftLF);
+        JLabel tOrEL2 = new JLabel("Total");
+        tOrEL2.setFont(leftLF);
+        JTextField numT = new JTextField(4);
         numT.setInputVerifier(InputV.IV_INT);
-        numT.setFont(lF);
+        numT.setHorizontalAlignment(JTextField.RIGHT);
+        numT.setFont(leftTFF);
+        JLabel numTitleL = new JLabel("個数");
+        numTitleL.setFont(leftTitleF);
         JLabel numL = new JLabel("個");
-        JTextField cspTF = new JTextField("444444");
+        numL.setFont(leftLF);
+        JTextField cspTF = new JTextField(6);
         cspTF.setEditable(false);
-        cspTF.setFont(lF);
-        JLabel cspL = new JLabel("コスパ");
+        cspTF.setFont(leftTFF);
+        JLabel cspTitleL = new JLabel("コスパ");
+        cspTitleL.setFont(leftTitleF);
+        JLabel cspL = new JLabel("kcal/100円");
+        cspL.setFont(leftLF);
         JButton newB = new JButton("登録");
         JToggleButton calTB = new JToggleButton("calggg");
         JToggleButton cosTB = new JToggleButton("costgg");
@@ -78,6 +100,7 @@ public class CalcFlame extends JFrame {
 
             if (calStr.isEmpty() || cosStr.isEmpty()) {     //未入力があるときコスパクリア
                 cspTF.setText("");
+                newB.setEnabled(false);
                 return;
             }
             boolean mixB = calTB.isSelected() ^ cosTB.isSelected();
@@ -85,6 +108,7 @@ public class CalcFlame extends JFrame {
                 numT.setEnabled(true);
                 if (numStr.isEmpty()) {     //未入力のときコスパクリア
                     cspTF.setText("");
+                    newB.setEnabled(false);
                     return;
                 }
             } else {     //総のみまたは個のみ
@@ -97,6 +121,7 @@ public class CalcFlame extends JFrame {
 
                 if (cos == 0) {     //ゼロ除算避け
                     cspTF.setText("");
+                    newB.setEnabled(false);
                     return;
                 }
                 int result;
@@ -109,9 +134,11 @@ public class CalcFlame extends JFrame {
                     result = cal * 100 / cos;
                 }
                 cspTF.setText(String.valueOf(result));
+                newB.setEnabled(true);
 
             } catch (NumberFormatException e) {
                 cspTF.setText("");
+                newB.setEnabled(false);
             }
         };
 
@@ -144,6 +171,16 @@ public class CalcFlame extends JFrame {
         };
         calTB.addItemListener(toggleChange::accept);
         cosTB.addItemListener(toggleChange::accept);
+
+        //登録ボタンアクション
+        newB.addActionListener(e -> {
+            NDialog nDialog = new NDialog(CFlame.getInstance());
+            nDialog.setLocationRelativeTo(this);
+            nDialog.setCalT(calT.getText());
+            nDialog.setCosT(cosT.getText());
+            nDialog.setNumT(numT.getText());
+            nDialog.setVisible(true);
+        });
 
 
         //centerPコンポーネント
@@ -276,38 +313,76 @@ public class CalcFlame extends JFrame {
 
 
         //lPサイズ設定
-//        spL.putConstraint(SpringLayout.SOUTH, leftP, 600, SpringLayout.NORTH, leftP);
-//        spL.putConstraint(SpringLayout.EAST, leftP, 600, SpringLayout.WEST, leftP);
+        spL.putConstraint(SpringLayout.SOUTH, leftP, 407, SpringLayout.NORTH, leftP);
+        spL.putConstraint(SpringLayout.EAST, leftP, 300, SpringLayout.WEST, leftP);
 
         //lPコンポーネント配置設定
-        spL.putConstraint(SpringLayout.NORTH, calT, 30, SpringLayout.NORTH, leftP);
-        spL.putConstraint(SpringLayout.WEST, calT, 20, SpringLayout.WEST, leftP);
+        spL.putConstraint(SpringLayout.NORTH, calT, 40, SpringLayout.NORTH, leftP);
+        spL.putConstraint(SpringLayout.WEST, calT, 80, SpringLayout.WEST, leftP);
+
+        spL.putConstraint(SpringLayout.SOUTH, calTitleL, 0, SpringLayout.NORTH, calT);
+        spL.putConstraint(SpringLayout.WEST, calTitleL, 0, SpringLayout.WEST, calT);
+
+        spL.putConstraint(SpringLayout.SOUTH, tOrEL1, 0, SpringLayout.SOUTH, calT);
+        spL.putConstraint(SpringLayout.EAST, tOrEL1, -2, SpringLayout.WEST, calT);
+
+        spL.putConstraint(SpringLayout.WEST, calL, 0, SpringLayout.EAST, calT);
+        spL.putConstraint(SpringLayout.SOUTH, calL, 0, SpringLayout.SOUTH, calT);
 
         spL.putConstraint(SpringLayout.SOUTH, calTB, 0, SpringLayout.NORTH, calT);
         spL.putConstraint(SpringLayout.EAST, calTB, -1, SpringLayout.EAST, calT);
 
-        spL.putConstraint(SpringLayout.NORTH, cosT, 40, SpringLayout.SOUTH, calT);
-        spL.putConstraint(SpringLayout.WEST, cosT, 20, SpringLayout.WEST, calT);
+        spL.putConstraint(SpringLayout.NORTH, cosT, 50, SpringLayout.SOUTH, calT);
+        spL.putConstraint(SpringLayout.EAST, cosT, 0, SpringLayout.EAST, calT);
+
+        spL.putConstraint(SpringLayout.SOUTH, cosTitleL, 0, SpringLayout.NORTH, cosT);
+        spL.putConstraint(SpringLayout.WEST, cosTitleL, 0, SpringLayout.WEST, cosT);
+
+        spL.putConstraint(SpringLayout.SOUTH, tOrEL2, 0, SpringLayout.SOUTH, cosT);
+        spL.putConstraint(SpringLayout.EAST, tOrEL2, -2, SpringLayout.WEST, cosT);
+
+        spL.putConstraint(SpringLayout.WEST, cosL, 0, SpringLayout.EAST, cosT);
+        spL.putConstraint(SpringLayout.SOUTH, cosL, 0, SpringLayout.SOUTH, cosT);
 
         spL.putConstraint(SpringLayout.SOUTH, cosTB, 0, SpringLayout.NORTH, cosT);
-        spL.putConstraint(SpringLayout.WEST, cosTB, -2, SpringLayout.WEST, cosT);
+        spL.putConstraint(SpringLayout.EAST, cosTB, -1, SpringLayout.EAST, cosT);
 
-        spL.putConstraint(SpringLayout.NORTH, numT, 10, SpringLayout.SOUTH, cosT);
-        spL.putConstraint(SpringLayout.WEST, numT, -10, SpringLayout.WEST, cosT);
+        spL.putConstraint(SpringLayout.NORTH, numT, 50, SpringLayout.SOUTH, cosT);
+        spL.putConstraint(SpringLayout.EAST, numT, 0, SpringLayout.EAST, cosT);
 
-        spL.putConstraint(SpringLayout.NORTH, cspTF, 30, SpringLayout.SOUTH, numT);
-        spL.putConstraint(SpringLayout.WEST, cspTF, 10, SpringLayout.WEST, numT);
+        spL.putConstraint(SpringLayout.SOUTH, numTitleL, 0, SpringLayout.NORTH, numT);
+        spL.putConstraint(SpringLayout.WEST, numTitleL, 0, SpringLayout.WEST, numT);
+
+        spL.putConstraint(SpringLayout.WEST, numL, 0, SpringLayout.EAST, numT);
+        spL.putConstraint(SpringLayout.SOUTH, numL, 0, SpringLayout.SOUTH, numT);
+
+        spL.putConstraint(SpringLayout.NORTH, cspTF, 60, SpringLayout.SOUTH, numT);
+        spL.putConstraint(SpringLayout.EAST, cspTF, 0, SpringLayout.EAST, numT);
+
+        spL.putConstraint(SpringLayout.SOUTH, cspTitleL, 0, SpringLayout.NORTH, cspTF);
+        spL.putConstraint(SpringLayout.WEST, cspTitleL, 0, SpringLayout.WEST, cspTF);
+
+        spL.putConstraint(SpringLayout.WEST, cspL, 0, SpringLayout.EAST, cspTF);
+        spL.putConstraint(SpringLayout.SOUTH, cspL, 0, SpringLayout.SOUTH, cspTF);
 
         spL.putConstraint(SpringLayout.NORTH, newB, 10, SpringLayout.SOUTH, cspTF);
-        spL.putConstraint(SpringLayout.WEST, newB, 0, SpringLayout.WEST, cspTF);
+        spL.putConstraint(SpringLayout.EAST, newB, 0, SpringLayout.EAST, cspTF);
 
 
 
 
         //コンポーネントの配置
-        leftP.add(calTB); leftP.add(cosTB);
-        leftP.add(calT); leftP.add(cosT); leftP.add(numT);
-        leftP.add(cspTF);
+        leftP.add(calTitleL); leftP.add(calTB);
+        leftP.add(tOrEL1); leftP.add(calT); leftP.add(calL);
+
+        leftP.add(cosTitleL); leftP.add(cosTB);
+        leftP.add(tOrEL2); leftP.add(cosT); leftP.add(cosL);
+
+        leftP.add(numTitleL);
+        leftP.add(numT); leftP.add(numL);
+
+        leftP.add(cspTitleL);
+        leftP.add(cspTF); leftP.add(cspL);
         leftP.add(newB);
 
         centerDispP.add(dispSubL);

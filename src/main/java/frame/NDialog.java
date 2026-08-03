@@ -13,14 +13,15 @@ import java.util.Arrays;
 
 public class NDialog extends JDialog {
 
-    CFlame owner;
-    LineBorder lBRed = new LineBorder(Color.RED);
-    LineBorder lBBlue = new LineBorder(Color.BLUE);
-    LineBorder lBOrange = new LineBorder(Color.ORANGE);
+    private final JTextField calT = new JTextField(4);
+    private final JTextField cosT = new JTextField(5);
+    private final JTextField numT = new JTextField(3);
+    private final LineBorder lBRed = new LineBorder(Color.RED);
+    private final LineBorder lBBlue = new LineBorder(Color.BLUE);
+    private final LineBorder lBOrange = new LineBorder(Color.ORANGE);
 
     public NDialog(CFlame owner){
         super(owner, "商品情報入力", true);
-        this.owner = owner;
 
         FlowLayout fLayout = new FlowLayout();
         fLayout.setAlignment(FlowLayout.LEFT);
@@ -45,9 +46,7 @@ public class NDialog extends JDialog {
 
         JTextField urlT = new JTextField(51);
         JTextField nameT = new JTextField(28);
-        JTextField calT = new JTextField(4);
-        JTextField cosT = new JTextField(5);
-        JTextField numT = new JTextField(3);
+
         JTextField[] textFields = {urlT, nameT, calT, cosT, numT};
 
         urlT.setInputVerifier(InputV.IV_STR);
@@ -56,28 +55,25 @@ public class NDialog extends JDialog {
         cosT.setInputVerifier(InputV.IV_INT);
         numT.setInputVerifier(InputV.IV_INT);
 
-        JRadioButton purR1 = new JRadioButton("燃料", true);
-        purR1.setActionCommand("1");
-        JRadioButton purR2 = new JRadioButton("糖分");
-        purR2.setActionCommand("2");
-        JRadioButton purR3 = new JRadioButton("その他");
-        purR3.setActionCommand("3");
-        ButtonGroup purG = new ButtonGroup();
-        purG.add(purR1);
-        purG.add(purR2);
-        purG.add(purR3);
+        JRadioButton purposeR1= new JRadioButton("燃料", true);
+        purposeR1.setActionCommand("1");
+        JRadioButton purposeR2 = new JRadioButton("糖分");
+        purposeR2.setActionCommand("2");
+        JRadioButton purposeR3 = new JRadioButton("その他");
+        purposeR3.setActionCommand("3");
+        ButtonGroup purposeG = new ButtonGroup();
+        purposeG.add(purposeR1);
+        purposeG.add(purposeR2);
+        purposeG.add(purposeR3);
 
         JButton addB = new JButton("追加");
 
+        //追加ボタンアクション
         addB.addActionListener(new ActionListener() {
-            /**
-             * 入力決定したとき
-             * @param e the event to be processed
-             */
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                String purT = purG.getSelection().getActionCommand();
+                String purT = purposeG.getSelection().getActionCommand();
 
                 //入力がInputverifier通りか判定
                 if(Arrays.stream(textFields).allMatch(t -> t.getInputVerifier().verify(t))){
@@ -125,7 +121,7 @@ public class NDialog extends JDialog {
         });
 
         np1.add(urlL); np1.add(urlT);
-        np2.add(nameL); np2.add(nameT); np2.add(purL); np2.add(purR1); np2.add(purR2); np2.add(purR3);
+        np2.add(nameL); np2.add(nameT); np2.add(purL); np2.add(purposeR1); np2.add(purposeR2); np2.add(purposeR3);
         np3.add(calL); np3.add(calT); np3.add(cosL); np3.add(cosT); np3.add(numL); np3.add(numT); np3.add(Box.createRigidArea(new Dimension(260, 1))); np3.add(addB);
 
         np0.add(np1); np0.add(np2); np0.add(np3);
@@ -135,5 +131,15 @@ public class NDialog extends JDialog {
 
         pack();
 
+    }
+    //セッター
+    public void setCalT(String str) {
+        this.calT.setText(str);
+    }
+    public void setCosT(String str) {
+        this.cosT.setText(str);
+    }
+    public void setNumT(String str) {
+        this.numT.setText(str);
     }
 }
