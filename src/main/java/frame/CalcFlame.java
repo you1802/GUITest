@@ -6,6 +6,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -77,6 +80,7 @@ public class CalcFlame extends JFrame {
         numT.setInputVerifier(InputV.IV_INT);
         numT.setHorizontalAlignment(JTextField.RIGHT);
         numT.setFont(leftTFF);
+        numT.setEnabled(false);
         JLabel numTitleL = new JLabel("個数");
         numTitleL.setFont(leftTitleF);
         JLabel numL = new JLabel("個");
@@ -89,8 +93,9 @@ public class CalcFlame extends JFrame {
         JLabel cspL = new JLabel("kcal/100円");
         cspL.setFont(leftLF);
         JButton newB = new JButton("登録");
-        JToggleButton calTB = new JToggleButton("calggg");
-        JToggleButton cosTB = new JToggleButton("costgg");
+        JToggleButton calTB = new JToggleButton("(● 総  )");
+        JToggleButton cosTB = new JToggleButton("(● 総  )");
+
 
         //簡易計算機処理
         Runnable valueUpdate = () -> {   //関数型インターフェイスに処理を記載
@@ -103,8 +108,7 @@ public class CalcFlame extends JFrame {
                 newB.setEnabled(false);
                 return;
             }
-            boolean mixB = calTB.isSelected() ^ cosTB.isSelected();
-            if (mixB) {     //総と個が混ざるとき
+            if (calTB.isSelected() ^ cosTB.isSelected()) {     //総と個が混ざるとき
                 numT.setEnabled(true);
                 if (numStr.isEmpty()) {     //未入力のときコスパクリア
                     cspTF.setText("");
@@ -115,7 +119,7 @@ public class CalcFlame extends JFrame {
                 numT.setEnabled(false);
             }
             try {
-                //入力が揃っているとき
+                //入力が揃っているとき計算
                 int cal = Integer.parseInt(calStr);
                 int cos = Integer.parseInt(cosStr);
 
@@ -125,17 +129,18 @@ public class CalcFlame extends JFrame {
                     return;
                 }
                 int result;
-
-                if (mixB) {     //総と個が混ざるとき
-                    int num = Integer.parseInt(numStr);
-                    result = (cal * 100 * num) / cos;
-                } else {     //総のみまたは個のみ
-                    numT.setEnabled(false);
-                    result = cal * 100 / cos;
-                }
-                cspTF.setText(String.valueOf(result));
-                newB.setEnabled(true);
-
+                if (calTB.isSelected() && !cosTB.isSelected()) {    //calだけが個のとき
+                        int num = Integer.parseInt(numStr);
+                        result = (cal * 100 * num) / cos;
+                    } else if (!calTB.isSelected() && cosTB.isSelected()) {   //cosだけが個のとき
+                        int num = Integer.parseInt(numStr);
+                        result = cal * 100 / (cos * num);
+                    } else {   //総のみまたは個のみ
+                        numT.setEnabled(false);
+                        result = cal * 100 / cos;
+                    }
+                    cspTF.setText(String.valueOf(result));
+                    newB.setEnabled(true);
             } catch (NumberFormatException e) {
                 cspTF.setText("");
                 newB.setEnabled(false);
@@ -157,16 +162,18 @@ public class CalcFlame extends JFrame {
             JToggleButton source = (JToggleButton) e.getSource();
             if (source == calTB) {
                 if (calTB.isSelected()) {
-                    valueUpdate.run();
+                    calTB.setText("(  個 ●)");
                 }else {
-                    valueUpdate.run();
+                    calTB.setText("(● 総  )");
                 }
+                valueUpdate.run();
             } else if (source == cosTB) {
                 if (cosTB.isSelected()) {
-                    valueUpdate.run();
+                    cosTB.setText("(  個 ●)");
                 }else {
-                    valueUpdate.run();
+                    cosTB.setText("(● 総  ");
                 }
+                valueUpdate.run();
             }
         };
         calTB.addItemListener(toggleChange::accept);
@@ -176,9 +183,33 @@ public class CalcFlame extends JFrame {
         newB.addActionListener(e -> {
             NDialog nDialog = new NDialog(CFlame.getInstance());
             nDialog.setLocationRelativeTo(this);
-            nDialog.setCalT(calT.getText());
-            nDialog.setCosT(cosT.getText());
-            nDialog.setNumT(numT.getText());
+
+            int cal = Integer.parseInt(calT.getText());
+            int cos = Integer.parseInt(cosT.getText());
+            if (calTB.isSelected() && !cosTB.isSelected()) {    //calだけが個のとき
+                nDialog.setCalT(calT.getText());
+                nDialog.setCosT(cosT.getText());
+                nDialog.setNumT(numT.getText());
+            } else if (!calTB.isSelected() && cosTB.isSelected()) {   //cosだけが個のとき
+                int num = Integer.parseInt(numT.getText());
+                int totalCos = cos * num;
+                int eachCal = cal / num;
+                nDialog.setCalT(String.valueOf(eachCal));
+                nDialog.setCosT(String.valueOf(totalCos));
+                nDialog.setNumT(numT.getText());
+            } else if (calTB.isSelected() && cosTB.isSelected()) {  //個のみ
+                int num = Integer.parseInt(numT.getText());
+                int totalCos = cos * num;
+                nDialog.setCalT(calT.getText());
+                nDialog.setCosT(String.valueOf(totalCos));
+                nDialog.setNumT(numT.getText());
+            } else if (!calTB.isSelected() && !cosTB.isSelected()) {    //総のみ
+                int num = Integer.parseInt(numT.getText());
+                int eachCal = cal / num;
+                nDialog.setCalT(String.valueOf(eachCal));
+                nDialog.setCosT(cosT.getText());
+                nDialog.setNumT(numT.getText());
+            }
             nDialog.setVisible(true);
         });
 

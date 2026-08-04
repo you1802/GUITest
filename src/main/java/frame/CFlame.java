@@ -20,7 +20,7 @@ public class CFlame extends JFrame {
     private ADialog aDialog;
     private final DefaultTableModel mainTM;
 
-    public static final String[] COLUMN_NAMES = {"商品名", "★100y毎c★", "価格", "カロリー", "個数", "用途", "日時", "URL", "id", "削除子"};
+    public static final String[] COLUMN_NAMES = {"商品名", "★100y毎c★", "総価格", "単カロリー", "個数", "用途", "日時", "URL", "id", "削除子"};
     Controller controller = Controller.getInstance();
 
     public CFlame() {
@@ -94,8 +94,8 @@ public class CFlame extends JFrame {
         sorter.setRowFilter(filter);
 
         //不要列を非表示
-        //table.removeColumn(table.getColumnModel().getColumn(9));
-        //table.removeColumn(table.getColumnModel().getColumn(8));
+        table.removeColumn(table.getColumnModel().getColumn(9));
+        table.removeColumn(table.getColumnModel().getColumn(8));
 
         //列の大きさを設定
         table.getColumnModel().getColumn(0).setPreferredWidth(200);
@@ -179,7 +179,7 @@ public class CFlame extends JFrame {
                                 int result = (calory * 100 * number) / cost;
                                 mainTM.setValueAt(result, row, 1);
                             } catch (Exception _) {
-                            } finally {
+                            } finally {     //確実にリスナーを再設定
                                 mainTM.addTableModelListener(listener);
                             }
                         }

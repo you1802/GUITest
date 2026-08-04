@@ -40,8 +40,8 @@ public class NDialog extends JDialog {
         JLabel urlL = new JLabel("URL:");
         JLabel nameL = new JLabel("商品名:");
         JLabel purL = new JLabel("        用途:");
-        JLabel calL = new JLabel("カロリー:");
-        JLabel cosL = new JLabel("    価格:");
+        JLabel calL = new JLabel("単カロリー:");
+        JLabel cosL = new JLabel("    総価格:");
         JLabel numL = new JLabel("    個数:");
 
         JTextField urlT = new JTextField(51);
@@ -133,13 +133,7 @@ public class NDialog extends JDialog {
 
     }
     //セッター
-    public void setCalT(String str) {
-        this.calT.setText(str);
-    }
-    public void setCosT(String str) {
-        this.cosT.setText(str);
-    }
-    public void setNumT(String str) {
-        this.numT.setText(str);
-    }
+    public void setCalT(String str) {this.calT.setText(str);}
+    public void setCosT(String str) {this.cosT.setText(str);}
+    public void setNumT(String str) {this.numT.setText(str);}
 }
