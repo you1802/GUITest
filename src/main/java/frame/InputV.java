@@ -3,16 +3,18 @@ package frame;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.util.Objects;
 
 //入力判定用のクラスを継承して作成
 class InputV extends InputVerifier {
 
     public static final InputV IV_STR = new InputV(".+");
-    public static final InputV IV_INT = new InputV("\\d+");
+    public static final InputV IV_INT = new InputV("^(?!0+$)\\d+$");   //”0だけ”以外の数字
 
-    String match;
-    LineBorder lBRed = new LineBorder(Color.RED);
-    LineBorder lBGray = new LineBorder(Color.GRAY);
+    private final String match;
+    public final LineBorder lBRed = new LineBorder(Color.RED);
+    public final LineBorder lBPink = new LineBorder(Color.PINK);
+    public final LineBorder lBGray = new LineBorder(Color.GRAY);
 
     private InputV(String match) {
 
@@ -27,13 +29,22 @@ class InputV extends InputVerifier {
 
     @Override
     public boolean shouldYieldFocus(JComponent source, JComponent target) {
-        if (verify(source)) {
-            source.setBorder(lBGray);
-        } else {
-            source.setBorder(lBRed);
-        }
-
-
+        textFieldColor((JTextField) source, verify(source));
         return true;
+    }
+
+    /**
+     * バリデーションによってボーダーの色を変える
+     * @param tf
+     * @param isValid
+     */
+    public void textFieldColor(JTextField tf, boolean isValid) {
+        if (isValid) {
+            tf.setBorder(lBGray);
+        } else if (tf.getText().trim().isEmpty()) {
+            tf.setBorder(lBPink);
+        } else {
+            tf.setBorder(lBRed);
+        }
     }
 }

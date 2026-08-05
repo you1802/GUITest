@@ -32,10 +32,6 @@ public class NDialog extends JDialog {
         JPanel np1 = new JPanel(fLayout);
         JPanel np2 = new JPanel(fLayout);
         JPanel np3 = new JPanel(fLayout);
-        //サイズテスト用着色
-        //np1.setBackground(Color.GRAY);
-        //np2.setBackground(Color.LIGHT_GRAY);
-        //np3.setBackground(Color.GRAY);
 
         JLabel urlL = new JLabel("URL:");
         JLabel nameL = new JLabel("商品名:");
@@ -119,7 +115,7 @@ public class NDialog extends JDialog {
                 }
             }
         });
-
+        //コンポーネント配置
         np1.add(urlL); np1.add(urlT);
         np2.add(nameL); np2.add(nameT); np2.add(purL); np2.add(purposeR1); np2.add(purposeR2); np2.add(purposeR3);
         np3.add(calL); np3.add(calT); np3.add(cosL); np3.add(cosT); np3.add(numL); np3.add(numT); np3.add(Box.createRigidArea(new Dimension(260, 1))); np3.add(addB);
