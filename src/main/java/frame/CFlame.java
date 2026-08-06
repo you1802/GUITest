@@ -12,6 +12,7 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 public class CFlame extends JFrame {
@@ -21,7 +22,15 @@ public class CFlame extends JFrame {
     private final DefaultTableModel mainTM;
 
     public static final String[] COLUMN_NAMES = {"商品名", "★100y毎c★", "総価格", "単カロリー", "個数", "用途", "日時", "URL", "id", "削除子"};
-    Controller controller = Controller.getInstance();
+    Controller controller;
+
+    {
+        try {
+            controller = Controller.getInstance();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public CFlame() {
         //メインウィンドウ
@@ -32,7 +41,13 @@ public class CFlame extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                controller.windowDAO.winSave(getX(), getY(), getWidth(), getHeight());
+                try {
+                    controller.windowDAO.winSave(getX(), getY(), getWidth(), getHeight());
+                } catch (SQLException ex) {
+                    ex.fillInStackTrace();
+                    JOptionPane.showMessageDialog(cFlame,"SQLエラー", "エラー", JOptionPane.ERROR_MESSAGE);
+                    System.exit(1);
+                }
             }
         });
 
@@ -189,42 +204,48 @@ public class CFlame extends JFrame {
                 //テーブルの変更を検知
                 if (e.getType() == TableModelEvent.UPDATE && e.getSource() == table.getModel()) {
                     Object o = mainTM.getValueAt(row, column);
-                    switch (column) {
-                        case 0:
-                            controller.editNameDB((Integer) mainTM.getValueAt(row, 8), (String) o);
-                            break;
-                        case 2, 3, 4: {
-                            switch (column) {
-                                case 2:
-                                    controller.editCostDB((Integer) mainTM.getValueAt(row, 8), (Integer) o);
-                                    break;
-                                case 3:
-                                    controller.editCaloryDB((Integer) mainTM.getValueAt(row, 8), (Integer) o);
-                                    break;
-                                case 4:
-                                    controller.editNumberDB((Integer) mainTM.getValueAt(row, 8), (Integer) o);
-                                    break;
+                    try {
+                        switch (column) {
+                            case 0:
+                                controller.editNameDB((Integer) mainTM.getValueAt(row, 8), (String) o);
+                                break;
+                            case 2, 3, 4: {
+                                switch (column) {
+                                    case 2:
+                                        controller.editCostDB((Integer) mainTM.getValueAt(row, 8), (Integer) o);
+                                        break;
+                                    case 3:
+                                        controller.editCaloryDB((Integer) mainTM.getValueAt(row, 8), (Integer) o);
+                                        break;
+                                    case 4:
+                                        controller.editNumberDB((Integer) mainTM.getValueAt(row, 8), (Integer) o);
+                                        break;
+                                }
+                                //コスパに変動があった場合、再計算
+                                mainTM.removeTableModelListener(this);
+                                int calory = (Integer) mainTM.getValueAt(row, 3);
+                                int cost = (Integer) mainTM.getValueAt(row, 2);
+                                int number = (Integer) mainTM.getValueAt(row, 4);
+                                int result = (calory * 100 * number) / cost;
+                                mainTM.setValueAt(result, row, 1);
+                                mainTM.addTableModelListener(this);
+                                break;
                             }
-                            //コスパに変動があった場合、再計算
-                            mainTM.removeTableModelListener(this);
-                            int calory = (Integer) mainTM.getValueAt(row, 3);
-                            int cost = (Integer) mainTM.getValueAt(row, 2);
-                            int number = (Integer) mainTM.getValueAt(row, 4);
-                            int result = (calory * 100 * number) / cost;
-                            mainTM.setValueAt(result, row, 1);
-                            mainTM.addTableModelListener(this);
-                            break;
+                            case 5:
+                                int p = 3;
+                                switch (mainTM.getValueAt(row, 5).toString()) {
+                                    case "燃料" -> p = 1;
+                                    case "糖分" -> p = 2;
+                                }
+                                controller.editPurposeDB((Integer) mainTM.getValueAt(row, 8), p);
+                                break;
+                            case 7:
+                                controller.editUrlDB((Integer) mainTM.getValueAt(row, 8), (String) o);
                         }
-                        case 5:
-                            int p = 3;
-                            switch (mainTM.getValueAt(row, 5).toString()) {
-                                case "燃料" -> p = 1;
-                                case "糖分" -> p = 2;
-                            }
-                            controller.editPurposeDB((Integer) mainTM.getValueAt(row, 8), p);
-                            break;
-                        case 7:
-                            controller.editUrlDB((Integer) mainTM.getValueAt(row, 8), (String) o);
+                    } catch (SQLException ex) {
+                        ex.fillInStackTrace();
+                        JOptionPane.showMessageDialog(cFlame,"SQLエラー", "エラー", JOptionPane.ERROR_MESSAGE);
+                        System.exit(1);
                     }
                 }
             }
@@ -246,7 +267,13 @@ public class CFlame extends JFrame {
                 //削除子をオン
                 for (int i = modelRows.length - 1; i >= 0; i--) {
                     mainTM.setValueAt(true, modelRows[i], 9);
-                    controller.deleteDB((Integer) mainTM.getValueAt(modelRows[i], 8));
+                    try {
+                        controller.deleteDB((Integer) mainTM.getValueAt(modelRows[i], 8));
+                    } catch (SQLException ex) {
+                        ex.fillInStackTrace();
+                        JOptionPane.showMessageDialog(this,"SQLエラー", "エラー", JOptionPane.ERROR_MESSAGE);
+                        System.exit(1);
+                    }
                 }
 
                 perCB.setSelected(false);

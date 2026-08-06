@@ -14,10 +14,10 @@ public class CospaDAO {
     }
 
     //読み込み
-    public ArrayList<CospaDTO> load() {
+    public ArrayList<CospaDTO> load() throws SQLException {
         ArrayList<CospaDTO> list = new ArrayList<>();
 
-        try {
+
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             Statement sta = con.createStatement();
 
@@ -43,15 +43,12 @@ public class CospaDAO {
             }
             con.close();
             return list;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     //保存
-    public void save(CospaDTO cospaDTO){
+    public void save(CospaDTO cospaDTO) throws SQLException {
 
-        try {
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
                     INSERT INTO cospa(id, url, name, date, cost, number, purpose, calory, deleted)
@@ -70,14 +67,12 @@ public class CospaDAO {
             psta.execute();
 
             con.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     //削除フラグをオン
-    public void deleteDB(int id){
-        try {
+    public void deleteDB(int id) throws SQLException {
+
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
                     UPDATE cospa
@@ -88,13 +83,11 @@ public class CospaDAO {
             psta.execute();
 
             con.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
-    public void unDeleDB(int id) {
-        try {
+    public void unDeleDB(int id) throws SQLException {
+
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
                     UPDATE cospa
@@ -105,14 +98,11 @@ public class CospaDAO {
             psta.execute();
 
             con.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     //行を編集
-    public String editNameDB(int id, String s){
-        try {
+    public String editNameDB(int id, String s) throws SQLException {
+
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
                     UPDATE cospa
@@ -124,15 +114,12 @@ public class CospaDAO {
             psta.execute();
 
             con.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
 
         return s;
     }
 
-    public String editUrlDB(int id, String s){
-        try {
+    public String editUrlDB(int id, String s) throws SQLException {
+
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
                     UPDATE cospa
@@ -144,15 +131,13 @@ public class CospaDAO {
             psta.execute();
 
             con.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+
 
         return s;
     }
 
-    public int editCostDB(int id, int i){
-        try {
+    public int editCostDB(int id, int i) throws SQLException {
+
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
                      UPDATE cospa 
@@ -164,15 +149,12 @@ public class CospaDAO {
             psta.execute();
 
             con.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
 
         return i;
     }
 
-    public int editPurposeDB(int id, int i){
-        try {
+    public int editPurposeDB(int id, int i) throws SQLException {
+
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
                      UPDATE cospa 
@@ -184,15 +166,12 @@ public class CospaDAO {
             psta.execute();
 
             con.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
 
         return i;
     }
 
-    public int editNumberDB(int id, int i){
-        try {
+    public int editNumberDB(int id, int i) throws SQLException {
+
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
                      UPDATE cospa 
@@ -204,15 +183,12 @@ public class CospaDAO {
             psta.execute();
 
             con.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
 
         return i;
     }
 
-    public int editCaloryDB(int id, int i){
-        try {
+    public int editCaloryDB(int id, int i) throws SQLException {
+
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
                      UPDATE cospa 
@@ -224,9 +200,6 @@ public class CospaDAO {
             psta.execute();
 
             con.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
 
         return i;
     }

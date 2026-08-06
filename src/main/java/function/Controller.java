@@ -3,6 +3,7 @@ package function;
 import entity.CospaDTO;
 import frame.CFlame;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -12,7 +13,7 @@ public class Controller {
     public static ArrayList<CospaDTO> list;
     public static Controller controller;
 
-    public Controller(){
+    public Controller() throws SQLException {
         windowDAO.winLoad();
         list = cospaDAO.load();
     }
@@ -25,19 +26,19 @@ public class Controller {
         return objects;
     }
     //中継メソッド
-    public void save(CospaDTO cospaDTO){
+    public void save(CospaDTO cospaDTO) throws SQLException {
         cospaDAO.save(cospaDTO);
     }
-    public void deleteDB(int id) {cospaDAO.deleteDB(id);}
-    public void unDeleDB(int id) {cospaDAO.unDeleDB(id);}
-    public String editNameDB(int id, String s){return cospaDAO.editNameDB(id, s);}
-    public String editUrlDB(int id, String s){return cospaDAO.editUrlDB(id, s);}
-    public int editCostDB(int id, int i){return cospaDAO.editCostDB(id, i);}
-    public int editCaloryDB(int id, int i){return cospaDAO.editCaloryDB(id, i);}
-    public int editPurposeDB(int id, int i){return cospaDAO.editPurposeDB(id, i);}
-    public int editNumberDB(int id, int i){return cospaDAO.editNumberDB(id, i);}
+    public void deleteDB(int id) throws SQLException {cospaDAO.deleteDB(id);}
+    public void unDeleDB(int id) throws SQLException {cospaDAO.unDeleDB(id);}
+    public String editNameDB(int id, String s) throws SQLException {return cospaDAO.editNameDB(id, s);}
+    public String editUrlDB(int id, String s) throws SQLException {return cospaDAO.editUrlDB(id, s);}
+    public int editCostDB(int id, int i) throws SQLException {return cospaDAO.editCostDB(id, i);}
+    public int editCaloryDB(int id, int i) throws SQLException {return cospaDAO.editCaloryDB(id, i);}
+    public int editPurposeDB(int id, int i) throws SQLException {return cospaDAO.editPurposeDB(id, i);}
+    public int editNumberDB(int id, int i) throws SQLException {return cospaDAO.editNumberDB(id, i);}
 
-    public static Controller getInstance(){
+    public static Controller getInstance() throws SQLException {
         if (controller == null){
             controller = new Controller();
         }

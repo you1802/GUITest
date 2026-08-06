@@ -14,7 +14,7 @@ public class WindowDAO {
     public int winHeight;
 
 //ウィンドウ情報を読み込み
-public void winLoad() {
+public void winLoad() throws SQLException {
     try (Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
          Statement sta = con.createStatement()) {
 
@@ -42,21 +42,21 @@ public void winLoad() {
                         VALUES (600, 400, 500, 200)
                         """);
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                throw new SQLException(e);
             }
         }
         } catch(SQLException e){
-            throw new RuntimeException(e);
+            throw new SQLException(e);
         }
     }
 
     //ウィンドウ情報を保存
-    public void winSave(int winX, int winY, int winWidth, int winHeight) {
+    public void winSave(int winX, int winY, int winWidth, int winHeight) throws SQLException {
         try (Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
              PreparedStatement pst = con.prepareStatement("""
                      UPDATE c_window
                      SET x = ?, y = ?, width = ?, height = ?
-                     """);) {
+                     """)) {
             pst.setInt(1, winX);
             pst.setInt(2, winY);
             pst.setInt(3, winWidth);
@@ -65,7 +65,7 @@ public void winLoad() {
 
         } catch (SQLException e) {
             throw
-                    new RuntimeException(e);
+                    new SQLException(e);
         }
     }
 }

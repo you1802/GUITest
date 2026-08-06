@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ import java.util.regex.Pattern;
 
 public class CalcFlame extends JFrame {
     private final DefaultListModel<String> logModel = new DefaultListModel<>();
+    private final LookAndFeel originLAF = UIManager.getLookAndFeel();
 
     public CalcFlame(CFlame owner) {
 
@@ -23,7 +25,6 @@ public class CalcFlame extends JFrame {
         Font leftLF = new Font(Font.DIALOG, Font.PLAIN, 14);
         Font leftTitleF = new Font(Font.DIALOG, Font.BOLD, 14);
         LineBorder bd = new LineBorder(Color.LIGHT_GRAY);
-        LineBorder bd2 = new LineBorder(Color.YELLOW);
         Dimension dispLSize = new Dimension(200, 32);
 
         //パネル列挙
@@ -36,6 +37,8 @@ public class CalcFlame extends JFrame {
         centerDispP.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         JPanel centerRecP = new JPanel();
 
+        centerP.setBorder(InputV.lBGray);
+
         Dimension btnCPD = new Dimension(230, 340);
         centerCalcBtnP.setPreferredSize(btnCPD);
         centerCalcBtnP.setMinimumSize(btnCPD);
@@ -46,9 +49,6 @@ public class CalcFlame extends JFrame {
         centerRecP.setMaximumSize(recPD);
         centerRecP.setMinimumSize(recPD);
 
-
-        leftP.setBorder(bd2);
-        centerP.setBorder(bd);
 
 
 
@@ -82,6 +82,7 @@ public class CalcFlame extends JFrame {
         JLabel numL = new JLabel("個");
         numL.setFont(leftLF);
         JTextField cspTF = new JTextField(6);
+        cspTF.setHorizontalAlignment(JTextField.RIGHT);
         cspTF.setEditable(false);
         cspTF.setFont(leftTFF);
         JLabel cspTitleL = new JLabel("コスパ");
@@ -89,9 +90,21 @@ public class CalcFlame extends JFrame {
         JLabel cspL = new JLabel("kcal/100円");
         cspL.setFont(leftLF);
         JButton newB = new JButton("登録");
-        JToggleButton calTB = new JToggleButton("(● 総  )");
-        JToggleButton cosTB = new JToggleButton("(● 総  )");
+        newB.setFont(leftLF);
+        JToggleButton calTBT = new JToggleButton("合計");
+        JToggleButton calTBE = new JToggleButton("単体");
+        JToggleButton cosTBT = new JToggleButton("総額");
+        JToggleButton cosTBE = new JToggleButton("単価");
 
+        ButtonGroup calTBG = new ButtonGroup();
+        calTBG.add(calTBT);
+        calTBG.add(calTBE);
+        calTBT.setSelected(true);
+
+        ButtonGroup cosTBG = new ButtonGroup();
+        cosTBG.add(cosTBT);
+        cosTBG.add(cosTBE);
+        cosTBT.setSelected(true);
 
         //簡易計算機処理
         Runnable valueUpdate = () -> {   //関数型インターフェイスに処理を記載
@@ -130,9 +143,9 @@ public class CalcFlame extends JFrame {
                     return;
                 }
                 int result;
-                if (calTB.isSelected() && !cosTB.isSelected()) {    //calだけが個のとき
+                if (calTBT.isSelected() && !cosTBT.isSelected()) {    //calだけが個のとき
                         result = (cal * 100 * num) / cos;
-                    } else if (!calTB.isSelected() && cosTB.isSelected()) {   //cosだけが個のとき
+                    } else if (!calTBT.isSelected() && cosTBT.isSelected()) {   //cosだけが個のとき
                         result = cal * 100 / (cos * num);
                     } else {   //総のみまたは個のみ
                         result = cal * 100 / cos;
@@ -144,14 +157,7 @@ public class CalcFlame extends JFrame {
                 newB.setEnabled(false);
             }
         };
-        //初回ベリファイ
-        boolean calValid = calT.getInputVerifier().verify(calT);
-        boolean cosValid = calT.getInputVerifier().verify(cosT);
-        boolean numValid = calT.getInputVerifier().verify(numT);
-        InputV.IV_INT.textFieldColor(calT, calValid);
-        InputV.IV_INT.textFieldColor(cosT, cosValid);
-        InputV.IV_INT.textFieldColor(numT, numValid);
-
+        valueUpdate.run();      //生成時バリデーション
 
 
         DocumentListener txtFldListener = new DocumentListener() {      //関数型インターフェイスを適用
@@ -167,28 +173,28 @@ public class CalcFlame extends JFrame {
         //トグルボタン処理
         Consumer<ItemEvent> toggleChange = (e) -> {
             JToggleButton source = (JToggleButton) e.getSource();
-            if (source == calTB) {
-                if (calTB.isSelected()) {
-                    calTB.setText("(  個 ●)");
+            if (source == calTBT) {
+                if (calTBT.isSelected()) {
+                    calTBT.setText("(  個 ●)");
                     tOrELcal.setText("each");
                 }else {
-                    calTB.setText("(● 総  )");
+                    calTBT.setText("(● 総  )");
                     tOrELcal.setText("Total");
                 }
                 valueUpdate.run();
-            } else if (source == cosTB) {
-                if (cosTB.isSelected()) {
-                    cosTB.setText("(  個 ●)");
+            } else if (source == cosTBT) {
+                if (cosTBT.isSelected()) {
+                    cosTBT.setText("(  個 ●)");
                     tOrELcos.setText("each");
                 }else {
-                    cosTB.setText("(● 総  )");
+                    cosTBT.setText("(● 総  )");
                     tOrELcos.setText("Total");
                 }
                 valueUpdate.run();
             }
         };
-        calTB.addItemListener(toggleChange::accept);
-        cosTB.addItemListener(toggleChange::accept);
+        calTBT.addItemListener(toggleChange::accept);
+        cosTBT.addItemListener(toggleChange::accept);
 
         //登録ボタンアクション
         newB.addActionListener(e -> {
@@ -197,24 +203,24 @@ public class CalcFlame extends JFrame {
 
             int cal = Integer.parseInt(calT.getText());
             int cos = Integer.parseInt(cosT.getText());
-            if (calTB.isSelected() && !cosTB.isSelected()) {    //calだけが個のとき
+            if (calTBT.isSelected() && !cosTBT.isSelected()) {    //calだけが個のとき
                 nDialog.setCalT(calT.getText());
                 nDialog.setCosT(cosT.getText());
                 nDialog.setNumT(numT.getText());
-            } else if (!calTB.isSelected() && cosTB.isSelected()) {   //cosだけが個のとき
+            } else if (!calTBT.isSelected() && cosTBT.isSelected()) {   //cosだけが個のとき
                 int num = Integer.parseInt(numT.getText());
                 int totalCos = cos * num;
                 int eachCal = cal / num;
                 nDialog.setCalT(String.valueOf(eachCal));
                 nDialog.setCosT(String.valueOf(totalCos));
                 nDialog.setNumT(numT.getText());
-            } else if (calTB.isSelected() && cosTB.isSelected()) {  //個のみ
+            } else if (calTBT.isSelected() && cosTBT.isSelected()) {  //個のみ
                 int num = Integer.parseInt(numT.getText());
                 int totalCos = cos * num;
                 nDialog.setCalT(calT.getText());
                 nDialog.setCosT(String.valueOf(totalCos));
                 nDialog.setNumT(numT.getText());
-            } else if (!calTB.isSelected() && !cosTB.isSelected()) {    //総のみ
+            } else if (!calTBT.isSelected() && !cosTBT.isSelected()) {    //総のみ
                 int num = Integer.parseInt(numT.getText());
                 int eachCal = cal / num;
                 nDialog.setCalT(String.valueOf(eachCal));
@@ -298,7 +304,7 @@ public class CalcFlame extends JFrame {
         JButton b7 = new JButton("7"); JButton b8 = new JButton("8"); JButton b9 = new JButton("9"); JButton bK = new JButton("×");
         JButton b4 = new JButton("4"); JButton b5 = new JButton("5"); JButton b6 = new JButton("6"); JButton bH = new JButton("-");
         JButton b1 = new JButton("1"); JButton b2 = new JButton("2"); JButton b3 = new JButton("3"); JButton bT = new JButton("+");
-        JButton bN1 = new JButton("F"); JButton b0 = new JButton("0"); JButton bS = new JButton("."); JButton bI = new JButton("=");
+        JButton bN1 = new JButton(""); JButton b0 = new JButton("0"); JButton bS = new JButton("."); JButton bI = new JButton("=");
 
         JButton[] btns = {bC, bCE, bX, bW, b7, b8, b9, bK, b4, b5, b6, bH, b1, b2, b3, bT, bN1, b0, bS, bI};
         Font btnF = new Font(Font.DIALOG, Font.BOLD, 20);
@@ -335,7 +341,7 @@ public class CalcFlame extends JFrame {
                         }
                     }
                     case "=" -> calcPushEqual(cV.calcIn, cV.calcSubS, cV.calcLog, cV.b);
-                    //case "F" -> ;
+                    case "" -> JOptionPane.showMessageDialog(this, new JLabel("SQLエラー"));
                     default -> {
                         if (cV.b[0]) {     //答えが残っているとき、クリアしてから入力
                             cV.calcIn.setLength(0);
@@ -354,12 +360,12 @@ public class CalcFlame extends JFrame {
 
         //lPサイズ設定
         spL.putConstraint(SpringLayout.SOUTH, leftP, 407, SpringLayout.NORTH, leftP);
-        spL.putConstraint(SpringLayout.EAST, leftP, 300, SpringLayout.WEST, leftP);
+        spL.putConstraint(SpringLayout.EAST, leftP, 233, SpringLayout.WEST, leftP);
 
         //lPコンポーネント配置設定
-        //cal系の基準 後続の基準
+        //cal系の基準 後続TextFieldの基準
         spL.putConstraint(SpringLayout.NORTH, calT, 40, SpringLayout.NORTH, leftP);
-        spL.putConstraint(SpringLayout.WEST, calT, 110, SpringLayout.WEST, leftP);
+        spL.putConstraint(SpringLayout.WEST, calT, 43, SpringLayout.WEST, leftP);
 
         spL.putConstraint(SpringLayout.SOUTH, calTitleL, 0, SpringLayout.NORTH, calT);
         spL.putConstraint(SpringLayout.WEST, calTitleL, 0, SpringLayout.WEST, calT);
@@ -370,8 +376,11 @@ public class CalcFlame extends JFrame {
         spL.putConstraint(SpringLayout.WEST, calL, 0, SpringLayout.EAST, calT);
         spL.putConstraint(SpringLayout.SOUTH, calL, 0, SpringLayout.SOUTH, calT);
 
-        spL.putConstraint(SpringLayout.SOUTH, calTB, 0, SpringLayout.NORTH, calT);
-        spL.putConstraint(SpringLayout.EAST, calTB, -1, SpringLayout.EAST, calT);
+        spL.putConstraint(SpringLayout.SOUTH, calTBE, 0, SpringLayout.NORTH, calT);
+        spL.putConstraint(SpringLayout.EAST, calTBE, 0, SpringLayout.EAST, calT);
+
+        spL.putConstraint(SpringLayout.SOUTH, calTBT, 0, SpringLayout.SOUTH, calTBE);
+        spL.putConstraint(SpringLayout.EAST, calTBT, 0, SpringLayout.WEST, calTBE);
 
         //cos系の基準
         spL.putConstraint(SpringLayout.NORTH, cosT, 50, SpringLayout.SOUTH, calT);
@@ -386,8 +395,11 @@ public class CalcFlame extends JFrame {
         spL.putConstraint(SpringLayout.WEST, cosL, 0, SpringLayout.EAST, cosT);
         spL.putConstraint(SpringLayout.SOUTH, cosL, 0, SpringLayout.SOUTH, cosT);
 
-        spL.putConstraint(SpringLayout.SOUTH, cosTB, 0, SpringLayout.NORTH, cosT);
-        spL.putConstraint(SpringLayout.EAST, cosTB, -1, SpringLayout.EAST, cosT);
+        spL.putConstraint(SpringLayout.SOUTH, cosTBE, 0, SpringLayout.NORTH, cosT);
+        spL.putConstraint(SpringLayout.EAST, cosTBE, 0, SpringLayout.EAST, cosT);
+
+        spL.putConstraint(SpringLayout.SOUTH, cosTBT, 0, SpringLayout.SOUTH, cosTBE);
+        spL.putConstraint(SpringLayout.EAST, cosTBT, 0, SpringLayout.WEST, cosTBE);
 
         //num系の基準
         spL.putConstraint(SpringLayout.NORTH, numT, 50, SpringLayout.SOUTH, cosT);
@@ -400,26 +412,26 @@ public class CalcFlame extends JFrame {
         spL.putConstraint(SpringLayout.SOUTH, numL, 0, SpringLayout.SOUTH, numT);
 
         //csp系の基準
-        spL.putConstraint(SpringLayout.NORTH, cspTF, 60, SpringLayout.SOUTH, numT);
-        spL.putConstraint(SpringLayout.EAST, cspTF, -40, SpringLayout.EAST, numT);
+        spL.putConstraint(SpringLayout.NORTH, cspTF, 55, SpringLayout.SOUTH, numT);
+        spL.putConstraint(SpringLayout.EAST, cspTF, 0, SpringLayout.EAST, numT);
 
         spL.putConstraint(SpringLayout.SOUTH, cspTitleL, 0, SpringLayout.NORTH, cspTF);
         spL.putConstraint(SpringLayout.WEST, cspTitleL, 0, SpringLayout.WEST, cspTF);
 
-        spL.putConstraint(SpringLayout.WEST, cspL, 0, SpringLayout.EAST, cspTF);
-        spL.putConstraint(SpringLayout.SOUTH, cspL, 0, SpringLayout.SOUTH, cspTF);
+        spL.putConstraint(SpringLayout.EAST, cspL, 25, SpringLayout.EAST, cspTF);
+        spL.putConstraint(SpringLayout.NORTH, cspL, -5, SpringLayout.SOUTH, cspTF);
 
-        spL.putConstraint(SpringLayout.NORTH, newB, 10, SpringLayout.SOUTH, cspTF);
+        spL.putConstraint(SpringLayout.NORTH, newB, 20, SpringLayout.SOUTH, cspTF);
         spL.putConstraint(SpringLayout.EAST, newB, 0, SpringLayout.EAST, cspTF);
 
 
 
 
         //コンポーネントの配置
-        leftP.add(calTitleL); leftP.add(calTB);
+        leftP.add(calTitleL); leftP.add(calTBT); leftP.add(calTBE);
         leftP.add(tOrELcal); leftP.add(calT); leftP.add(calL);
 
-        leftP.add(cosTitleL); leftP.add(cosTB);
+        leftP.add(cosTitleL); leftP.add(cosTBT); leftP.add(cosTBE);
         leftP.add(tOrELcos); leftP.add(cosT); leftP.add(cosL);
 
         leftP.add(numTitleL);
@@ -447,13 +459,13 @@ public class CalcFlame extends JFrame {
 
         add(leftP, BorderLayout.WEST); add(centerP, BorderLayout.CENTER);
 
-        valueUpdate.run();      //生成時計算
 
         //ウィンドウ設定
+        applyNimbusDirective(this);     //このフレームだけlafをNimbusに変更
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setSize(680, 448);
+        setSize(613, 448);
         setResizable(false);
-        //pack();
+
     }
 
     /**
@@ -528,6 +540,38 @@ public class CalcFlame extends JFrame {
 
             logModel.add(0, log);
 
+        }
+    }
+
+    /**
+     * laf変更にあたっての整理
+     * @param comp
+     */
+    private void applyNimbusDirective(Component comp) {
+        try {
+            //lafを変更し、このフレームだけに設定し、lafを戻す
+            UIManager.setLookAndFeel(new NimbusLookAndFeel());
+            applyNimbusProcess(comp);
+            UIManager.setLookAndFeel(originLAF);
+        } catch (UnsupportedLookAndFeelException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * laf変更の実処理
+     * @param comp
+     */
+    private void applyNimbusProcess(Component comp) {
+        //コンポーネントにlaf反映
+        if (comp instanceof JComponent jComp) {
+            jComp.updateUI();
+        }
+        //コンテナの子を取り出し、コンテナではなくなるまで処理
+        if (comp instanceof Container cont) {
+            for (Component child : cont.getComponents()) {
+                applyNimbusProcess(child);
+            }
         }
     }
 

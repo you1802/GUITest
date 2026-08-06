@@ -10,15 +10,22 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.sql.SQLException;
 import java.util.Objects;
 
 public class ADialog extends JDialog {
 
-    private final Controller controller = Controller.getInstance();
+    private Controller controller;
 
     public ADialog(CFlame owner) {
         super(owner, "全件表示", true);
-
+        try {
+            controller = Controller.getInstance();
+        } catch (SQLException e) {
+            e.fillInStackTrace();
+            JOptionPane.showMessageDialog(this,"SQLエラー", "エラー", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
 
         DefaultTableModel mainTM = owner.getTableModel();
 
@@ -73,8 +80,24 @@ public class ADialog extends JDialog {
                         int row = tableA.convertRowIndexToModel(e.getFirstRow());   //被選択行をモデル順化
                         boolean b = (boolean) mainTM.getValueAt(row, 9);    //削除フラグを参照
                         //変更内容をDBに反映
-                        if (b) controller.deleteDB((Integer) mainTM.getValueAt(row, 8));
-                        else controller.unDeleDB((Integer) mainTM.getValueAt(row, 8));
+                        if (b) {
+                            try {
+                                controller.deleteDB((Integer) mainTM.getValueAt(row, 8));
+                            } catch (SQLException ex) {
+                                ex.fillInStackTrace();
+                                JOptionPane.showMessageDialog(ADialog.this,"SQLエラー", "エラー", JOptionPane.ERROR_MESSAGE);
+                                System.exit(1);
+                            }
+                        }
+                        else {
+                            try {
+                                controller.unDeleDB((Integer) mainTM.getValueAt(row, 8));
+                            } catch (SQLException ex) {
+                                ex.fillInStackTrace();
+                                JOptionPane.showMessageDialog(ADialog.this,"SQLエラー", "エラー", JOptionPane.ERROR_MESSAGE);
+                                System.exit(1);
+                            }
+                        }
 
                         mainTM.fireTableCellUpdated(row, 9);    //更新指示
 

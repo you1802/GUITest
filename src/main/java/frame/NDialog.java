@@ -8,6 +8,7 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -87,7 +88,13 @@ public class NDialog extends JDialog {
                     //CFlameからテーブルを取得して行を追加
                     owner.getTableModel().addRow(cospaDTO.cospaDTOForm());
                     //DBに保存
-                    Controller.getInstance().save(cospaDTO);
+                    try {
+                        Controller.getInstance().save(cospaDTO);
+                    } catch (SQLException ex) {
+                        ex.fillInStackTrace();
+                        JOptionPane.showMessageDialog(NDialog.this,"SQLエラー", "エラー", JOptionPane.ERROR_MESSAGE);
+                        System.exit(1);
+                    }
                     //listに追加
                     Controller.list.add(cospaDTO);
 

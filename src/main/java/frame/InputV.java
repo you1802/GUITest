@@ -12,9 +12,9 @@ class InputV extends InputVerifier {
     public static final InputV IV_INT = new InputV("^(?!0+$)\\d+$");   //”0だけ”以外の数字
 
     private final String match;
-    public final LineBorder lBRed = new LineBorder(Color.RED);
-    public final LineBorder lBPink = new LineBorder(Color.PINK);
-    public final LineBorder lBGray = new LineBorder(Color.GRAY);
+    public static final LineBorder lBRed = new LineBorder(Color.RED);
+    public static final LineBorder lBPink = new LineBorder(Color.PINK);
+    public static final LineBorder lBGray = new LineBorder(Color.GRAY);
 
     private InputV(String match) {
 
