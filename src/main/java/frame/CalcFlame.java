@@ -17,8 +17,10 @@ import java.util.regex.Pattern;
 public class CalcFlame extends JFrame {
     private final DefaultListModel<String> logModel = new DefaultListModel<>();
     private final LookAndFeel originLAF = UIManager.getLookAndFeel();
+    private final JScrollPane listSP;
 
-    public CalcFlame(CFlame owner) {
+    public CalcFlame() {
+        super("コスパ計算");
 
         SpringLayout spL = new SpringLayout();
         Font leftTFF = new Font(Font.DIALOG, Font.PLAIN, 25);
@@ -48,9 +50,6 @@ public class CalcFlame extends JFrame {
         centerRecP.setPreferredSize(recPD);
         centerRecP.setMaximumSize(recPD);
         centerRecP.setMinimumSize(recPD);
-
-
-
 
         //leftPコンポーネント
         JTextField calT = new JTextField(7);
@@ -95,6 +94,10 @@ public class CalcFlame extends JFrame {
         JToggleButton calTBE = new JToggleButton("単体");
         JToggleButton cosTBT = new JToggleButton("総額");
         JToggleButton cosTBE = new JToggleButton("単価");
+        calTBT.setFocusPainted(false);
+        calTBE.setFocusPainted(false);
+        cosTBT.setFocusPainted(false);
+        cosTBE.setFocusPainted(false);
 
         ButtonGroup calTBG = new ButtonGroup();
         calTBG.add(calTBT);
@@ -143,9 +146,9 @@ public class CalcFlame extends JFrame {
                     return;
                 }
                 int result;
-                if (calTBT.isSelected() && !cosTBT.isSelected()) {    //calだけが個のとき
+                if (calTBE.isSelected() && cosTBT.isSelected()) {    //calだけが個のとき
                         result = (cal * 100 * num) / cos;
-                    } else if (!calTBT.isSelected() && cosTBT.isSelected()) {   //cosだけが個のとき
+                    } else if (calTBT.isSelected() && cosTBE.isSelected()) {   //cosだけが個のとき
                         result = cal * 100 / (cos * num);
                     } else {   //総のみまたは個のみ
                         result = cal * 100 / cos;
@@ -158,7 +161,6 @@ public class CalcFlame extends JFrame {
             }
         };
         valueUpdate.run();      //生成時バリデーション
-
 
         DocumentListener txtFldListener = new DocumentListener() {      //関数型インターフェイスを適用
             @Override public void insertUpdate(DocumentEvent e) {valueUpdate.run();}
@@ -175,29 +177,30 @@ public class CalcFlame extends JFrame {
             JToggleButton source = (JToggleButton) e.getSource();
             if (source == calTBT) {
                 if (calTBT.isSelected()) {
-                    calTBT.setText("(  個 ●)");
-                    tOrELcal.setText("each");
-                }else {
-                    calTBT.setText("(● 総  )");
                     tOrELcal.setText("Total");
                 }
-                valueUpdate.run();
+            } else if (source == calTBE) {
+                if (calTBE.isSelected()) {
+                    tOrELcal.setText("each");
+                }
             } else if (source == cosTBT) {
                 if (cosTBT.isSelected()) {
-                    cosTBT.setText("(  個 ●)");
-                    tOrELcos.setText("each");
-                }else {
-                    cosTBT.setText("(● 総  )");
                     tOrELcos.setText("Total");
                 }
-                valueUpdate.run();
+            } else if (source == cosTBE) {
+                if (cosTBE.isSelected()) {
+                    tOrELcos.setText("each");
+                }
             }
+            valueUpdate.run();
         };
         calTBT.addItemListener(toggleChange::accept);
+        calTBE.addItemListener(toggleChange::accept);
         cosTBT.addItemListener(toggleChange::accept);
+        cosTBE.addItemListener(toggleChange::accept);
 
         //登録ボタンアクション
-        newB.addActionListener(e -> {
+        newB.addActionListener(_ -> {
             NDialog nDialog = new NDialog(CFlame.getInstance());
             nDialog.setLocationRelativeTo(this);
 
@@ -230,7 +233,6 @@ public class CalcFlame extends JFrame {
             nDialog.setVisible(true);
         });
 
-
         //centerPコンポーネント
         JLabel dispSubL = new JLabel(" ");
         dispSubL.setHorizontalAlignment(JLabel.RIGHT);
@@ -251,7 +253,9 @@ public class CalcFlame extends JFrame {
         toCosTB.setEnabled(false);
         toCalTB.setEnabled(false);
         JList<String> dispLogList = new JList<>(logModel);
-        dispLogList.setFixedCellWidth(130);
+        dispLogList.setBackground(new Color(214, 217, 223));
+        listSP = new JScrollPane(dispLogList);
+        listSP.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         //リストのセルを右詰で表示する
         dispLogList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
@@ -262,17 +266,22 @@ public class CalcFlame extends JFrame {
             }
         });
 
-
+        //リストのリスナー設定
         Pattern toTBP = Pattern.compile("\\d+$");
         dispLogList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 boolean b = !dispLogList.isSelectionEmpty();
                 toCosTB.setEnabled(b);
                 toCalTB.setEnabled(b);
+                if (b) {
+                    toCalTB.setBackground(Color.ORANGE);
+                    toCosTB.setBackground(Color.ORANGE);
+                }
             }
         });
 
-        toCosTB.addActionListener(b -> {
+        //計算履歴を使用するボタンアクション
+        toCosTB.addActionListener(_ -> {
             if (!dispLogList.isSelectionEmpty()) {
                 Matcher toTBM = toTBP.matcher(dispLogList.getSelectedValue());
                 toTBM.find();
@@ -280,7 +289,7 @@ public class CalcFlame extends JFrame {
                 dispLogList.clearSelection();
             }
         });
-        toCalTB.addActionListener(b -> {
+        toCalTB.addActionListener(_ -> {
             if (!dispLogList.isSelectionEmpty()) {
                 Matcher toTBM = toTBP.matcher(dispLogList.getSelectedValue());
                 toTBM.find();
@@ -289,17 +298,13 @@ public class CalcFlame extends JFrame {
             }
         });
 
-
-
-
         //電卓用変数
         var cV = new Object() {
-            StringBuilder calcIn = new StringBuilder();
-            StringBuilder calcSubS = new StringBuilder();
-            String calcLog = "";
-            boolean[] b = {false};  //参照を渡すため配列にする
+            final StringBuilder calcIn = new StringBuilder();
+            final StringBuilder calcSubS = new StringBuilder();
+            final boolean[] b = {false};  //参照を渡すため配列にする
         };
-
+        //電卓ボタン
         JButton bC = new JButton("C"); JButton bCE = new JButton("CE"); JButton bX = new JButton("<X"); JButton bW = new JButton("÷");
         JButton b7 = new JButton("7"); JButton b8 = new JButton("8"); JButton b9 = new JButton("9"); JButton bK = new JButton("×");
         JButton b4 = new JButton("4"); JButton b5 = new JButton("5"); JButton b6 = new JButton("6"); JButton bH = new JButton("-");
@@ -319,7 +324,7 @@ public class CalcFlame extends JFrame {
             b.setMinimumSize(btnD);
             b.setMaximumSize(btnD);
 
-            b.addActionListener(e -> {
+            b.addActionListener(_ -> {
                 switch (b.getText()) {
                     case "C" -> {
                         cV.calcIn.setLength(0);
@@ -327,10 +332,10 @@ public class CalcFlame extends JFrame {
                     }
                     case "CE" -> cV.calcIn.setLength(0);
                     case "<X" -> cV.calcIn.deleteCharAt(cV.calcIn.length() - 1);
-                    case "÷" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, cV.b, "÷");
-                    case "×" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, cV.b, "×");
-                    case "-" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, cV.b, "-");
-                    case "+" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.calcLog, cV.b, "+");
+                    case "÷" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.b, "÷");
+                    case "×" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.b, "×");
+                    case "-" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.b, "-");
+                    case "+" -> calcAddSymbol(cV.calcIn, cV.calcSubS, cV.b, "+");
                     case "." -> {
                         if (cV.calcIn.isEmpty()) {
                             cV.calcIn.append(0).append(".");
@@ -340,8 +345,8 @@ public class CalcFlame extends JFrame {
                             }
                         }
                     }
-                    case "=" -> calcPushEqual(cV.calcIn, cV.calcSubS, cV.calcLog, cV.b);
-                    case "" -> JOptionPane.showMessageDialog(this, new JLabel("SQLエラー"));
+                    case "=" -> calcPushEqual(cV.calcIn, cV.calcSubS, cV.b);
+                    case "" -> System.out.println(centerCalcBtnP.getSize());
                     default -> {
                         if (cV.b[0]) {     //答えが残っているとき、クリアしてから入力
                             cV.calcIn.setLength(0);
@@ -355,9 +360,7 @@ public class CalcFlame extends JFrame {
             });
         });
 
-
-
-
+        //スプリングレイアウト設定
         //lPサイズ設定
         spL.putConstraint(SpringLayout.SOUTH, leftP, 407, SpringLayout.NORTH, leftP);
         spL.putConstraint(SpringLayout.EAST, leftP, 233, SpringLayout.WEST, leftP);
@@ -368,7 +371,7 @@ public class CalcFlame extends JFrame {
         spL.putConstraint(SpringLayout.WEST, calT, 43, SpringLayout.WEST, leftP);
 
         spL.putConstraint(SpringLayout.SOUTH, calTitleL, 0, SpringLayout.NORTH, calT);
-        spL.putConstraint(SpringLayout.WEST, calTitleL, 0, SpringLayout.WEST, calT);
+        spL.putConstraint(SpringLayout.WEST, calTitleL, -3, SpringLayout.WEST, calT);
 
         spL.putConstraint(SpringLayout.SOUTH, tOrELcal, 0, SpringLayout.SOUTH, calT);
         spL.putConstraint(SpringLayout.EAST, tOrELcal, -2, SpringLayout.WEST, calT);
@@ -380,14 +383,14 @@ public class CalcFlame extends JFrame {
         spL.putConstraint(SpringLayout.EAST, calTBE, 0, SpringLayout.EAST, calT);
 
         spL.putConstraint(SpringLayout.SOUTH, calTBT, 0, SpringLayout.SOUTH, calTBE);
-        spL.putConstraint(SpringLayout.EAST, calTBT, 0, SpringLayout.WEST, calTBE);
+        spL.putConstraint(SpringLayout.EAST, calTBT, 5, SpringLayout.WEST, calTBE);
 
         //cos系の基準
         spL.putConstraint(SpringLayout.NORTH, cosT, 50, SpringLayout.SOUTH, calT);
         spL.putConstraint(SpringLayout.EAST, cosT, 0, SpringLayout.EAST, calT);
 
         spL.putConstraint(SpringLayout.SOUTH, cosTitleL, 0, SpringLayout.NORTH, cosT);
-        spL.putConstraint(SpringLayout.WEST, cosTitleL, 0, SpringLayout.WEST, cosT);
+        spL.putConstraint(SpringLayout.WEST, cosTitleL, -3, SpringLayout.WEST, cosT);
 
         spL.putConstraint(SpringLayout.SOUTH, tOrELcos, 0, SpringLayout.SOUTH, cosT);
         spL.putConstraint(SpringLayout.EAST, tOrELcos, -2, SpringLayout.WEST, cosT);
@@ -399,14 +402,14 @@ public class CalcFlame extends JFrame {
         spL.putConstraint(SpringLayout.EAST, cosTBE, 0, SpringLayout.EAST, cosT);
 
         spL.putConstraint(SpringLayout.SOUTH, cosTBT, 0, SpringLayout.SOUTH, cosTBE);
-        spL.putConstraint(SpringLayout.EAST, cosTBT, 0, SpringLayout.WEST, cosTBE);
+        spL.putConstraint(SpringLayout.EAST, cosTBT, 5, SpringLayout.WEST, cosTBE);
 
         //num系の基準
         spL.putConstraint(SpringLayout.NORTH, numT, 50, SpringLayout.SOUTH, cosT);
         spL.putConstraint(SpringLayout.EAST, numT, 0, SpringLayout.EAST, cosT);
 
         spL.putConstraint(SpringLayout.SOUTH, numTitleL, 0, SpringLayout.NORTH, numT);
-        spL.putConstraint(SpringLayout.WEST, numTitleL, 0, SpringLayout.WEST, numT);
+        spL.putConstraint(SpringLayout.WEST, numTitleL, -3, SpringLayout.WEST, numT);
 
         spL.putConstraint(SpringLayout.WEST, numL, 0, SpringLayout.EAST, numT);
         spL.putConstraint(SpringLayout.SOUTH, numL, 0, SpringLayout.SOUTH, numT);
@@ -416,16 +419,14 @@ public class CalcFlame extends JFrame {
         spL.putConstraint(SpringLayout.EAST, cspTF, 0, SpringLayout.EAST, numT);
 
         spL.putConstraint(SpringLayout.SOUTH, cspTitleL, 0, SpringLayout.NORTH, cspTF);
-        spL.putConstraint(SpringLayout.WEST, cspTitleL, 0, SpringLayout.WEST, cspTF);
+        spL.putConstraint(SpringLayout.WEST, cspTitleL, -3, SpringLayout.WEST, cspTF);
 
         spL.putConstraint(SpringLayout.EAST, cspL, 25, SpringLayout.EAST, cspTF);
         spL.putConstraint(SpringLayout.NORTH, cspL, -5, SpringLayout.SOUTH, cspTF);
 
         spL.putConstraint(SpringLayout.NORTH, newB, 20, SpringLayout.SOUTH, cspTF);
         spL.putConstraint(SpringLayout.EAST, newB, 0, SpringLayout.EAST, cspTF);
-
-
-
+        //スプリングレイアウト設定ここまで
 
         //コンポーネントの配置
         leftP.add(calTitleL); leftP.add(calTBT); leftP.add(calTBE);
@@ -448,35 +449,34 @@ public class CalcFlame extends JFrame {
         centerBtnP.add(toCosTB);
 
         Arrays.stream(btns).forEach(centerCalcBtnP::add);
-
-        centerRecP.add(dispLogList);
+        centerCalcBtnP.setPreferredSize(new Dimension(226, 341));
+        centerCalcBtnP.setMinimumSize(new Dimension(226, 341));
+        centerCalcBtnP.setMaximumSize(new Dimension(226, 341));
 
         centerTopP.add(centerDispP, BorderLayout.CENTER);
         centerTopP.add(centerBtnP, BorderLayout.EAST);
 
+
         centerP.add(centerTopP, BorderLayout.NORTH);
-        centerP.add(centerCalcBtnP, BorderLayout.CENTER); centerP.add(centerRecP, BorderLayout.EAST);
+        centerP.add(centerCalcBtnP, BorderLayout.WEST); centerP.add(listSP, BorderLayout.CENTER);
 
         add(leftP, BorderLayout.WEST); add(centerP, BorderLayout.CENTER);
-
 
         //ウィンドウ設定
         applyNimbusDirective(this);     //このフレームだけlafをNimbusに変更
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(613, 448);
         setResizable(false);
-
     }
 
     /**
      * ＝以外の演算子を押したときの処理
      * @param in
      * @param subD
-     * @param log
      * @param b
      * @param synbol
      */
-    private void calcAddSymbol(StringBuilder in, StringBuilder subD, String log, boolean[] b, String synbol) {
+    private void calcAddSymbol(StringBuilder in, StringBuilder subD, boolean[] b, String synbol) {
         if (in.isEmpty()) {
             if (!subD.isEmpty()) subD.replace(subD.length() - 1, subD.length(), synbol);    //inなしsubあり　演算子を入れ替える
         } else {
@@ -492,7 +492,7 @@ public class CalcFlame extends JFrame {
                     in.setLength(0);
                 } else {    //sub末尾が=以外の演算子のとき
                     //計算した答えに演算子を足してsubに移動
-                    calcPushEqual(in, subD, log, b);
+                    calcPushEqual(in, subD, b);
                     subD.replace(0, subD.length(), in + synbol);
                     in.setLength(0);
                 }
@@ -503,12 +503,12 @@ public class CalcFlame extends JFrame {
 
     /**
      * ＝を押したときの処理
+     *
      * @param in
      * @param subD
-     * @param log
      * @param b
      */
-    private void calcPushEqual(StringBuilder in, StringBuilder subD, String log, boolean[] b) {
+    private void calcPushEqual(StringBuilder in, StringBuilder subD, boolean[] b) {
         Pattern p = Pattern.compile("\\D$");
         BigDecimal result;
 
@@ -519,27 +519,22 @@ public class CalcFlame extends JFrame {
             }
             //計算してlogに入れる
             switch (subD.charAt(subD.length() - 1)) {
-                case '÷' -> {
-                    result = new  BigDecimal(subD.substring(0, subD.length() - 1)).divide(new BigDecimal(in.toString()), 2, RoundingMode.HALF_UP);
-                }
-                case '×' -> {
-                    result = new  BigDecimal(subD.substring(0, subD.length() - 1)).multiply(new BigDecimal(in.toString()));
-                }
-                case '+' -> {
-                    result = new  BigDecimal(subD.substring(0, subD.length() - 1)).add(new BigDecimal(in.toString()));
-                }
-                case '-' -> {
-                    result = new  BigDecimal(subD.substring(0, subD.length() - 1)).subtract(new BigDecimal(in.toString()));
-                }
+                case '÷' -> result = new  BigDecimal(subD.substring(0, subD.length() - 1)).divide(new BigDecimal(in.toString()), 2, RoundingMode.HALF_UP);
+                case '×' -> result = new  BigDecimal(subD.substring(0, subD.length() - 1)).multiply(new BigDecimal(in.toString()));
+                case '+' -> result = new  BigDecimal(subD.substring(0, subD.length() - 1)).add(new BigDecimal(in.toString()));
+                case '-' -> result = new  BigDecimal(subD.substring(0, subD.length() - 1)).subtract(new BigDecimal(in.toString()));
                 default -> {return;}
             }
             subD.append(in).append("=");
             in.replace(0, in.length(), result.toString());
-            log = subD + "  " + in;
+            String log = subD + "  " + in;
             b[0] = true;
 
             logModel.add(0, log);
-
+            //スクロールバーを右端に移動
+            SwingUtilities.invokeLater(() -> {      //最後に処理される
+                listSP.getHorizontalScrollBar().setValue(0);
+            });
         }
     }
 
@@ -574,5 +569,4 @@ public class CalcFlame extends JFrame {
             }
         }
     }
-
 }

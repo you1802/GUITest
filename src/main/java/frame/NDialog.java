@@ -66,60 +66,56 @@ public class NDialog extends JDialog {
         JButton addB = new JButton("追加");
 
         //追加ボタンアクション
-        addB.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        addB.addActionListener(_ -> {
+            String purT = purposeG.getSelection().getActionCommand();
 
-                String purT = purposeG.getSelection().getActionCommand();
+            //入力がInputverifier通りか判定
+            if(Arrays.stream(textFields).allMatch(t -> t.getInputVerifier().verify(t))){
 
-                //入力がInputverifier通りか判定
-                if(Arrays.stream(textFields).allMatch(t -> t.getInputVerifier().verify(t))){
+                CospaDTO cospaDTO = new CospaDTO(
+                        Controller.list.isEmpty() ? 0 : Controller.list.getLast().getId() + 1,
+                        urlT.getText(),
+                        nameT.getText(),
+                        LocalDateTime.now().toString(),
+                        Integer.parseInt(cosT.getText()),
+                        Integer.parseInt(numT.getText()),
+                        Integer.parseInt(purT),
+                        Integer.parseInt(calT.getText()));
 
-                    CospaDTO cospaDTO = new CospaDTO(
-                            Controller.list.isEmpty() ? 0 : Controller.list.getLast().getId() + 1,
-                            urlT.getText(),
-                            nameT.getText(),
-                            LocalDateTime.now().toString(),
-                            Integer.parseInt(cosT.getText()),
-                            Integer.parseInt(numT.getText()),
-                            Integer.parseInt(purT),
-                            Integer.parseInt(calT.getText()));
-
-                    //CFlameからテーブルを取得して行を追加
-                    owner.getTableModel().addRow(cospaDTO.cospaDTOForm());
-                    //DBに保存
-                    try {
-                        Controller.getInstance().save(cospaDTO);
-                    } catch (SQLException ex) {
-                        ex.fillInStackTrace();
-                        JOptionPane.showMessageDialog(NDialog.this,"SQLエラー", "エラー", JOptionPane.ERROR_MESSAGE);
-                        System.exit(1);
-                    }
-                    //listに追加
-                    Controller.list.add(cospaDTO);
-
-                    setVisible(false);
-                } else {
-                    //一括正誤判定
-                    JTextField[] dif = Arrays.stream(textFields).filter(t -> !t.getInputVerifier().verify(t)).toArray(JTextField[]::new);
-                    Arrays.stream(dif).forEach(t -> t.setBorder(lBRed));
-                    Timer timer = new Timer(100, new ActionListener() {
-                        int c = 0;
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            c++;
-                            if (c == 5) {((Timer) e.getSource()).stop();
-                            }else if(c%2 == 0) {Arrays.stream(dif).forEach(t -> t.setBorder(lBRed));
-                            }else if (c%2 == 1){Arrays.stream(dif).forEach(t -> t.setBorder(lBOrange));
-                            }
-                            Arrays.stream(dif).forEach(Component::repaint);
-                        }
-                    });
-                    timer.start();
-
-                    Arrays.stream(textFields).filter(t -> t.getInputVerifier().verify(t)).forEach(t -> t.setBorder(lBBlue));
-                    Toolkit.getDefaultToolkit().beep();
+                //CFlameからテーブルを取得して行を追加
+                owner.getTableModel().addRow(cospaDTO.cospaDTOForm());
+                //DBに保存
+                try {
+                    Controller.getInstance().save(cospaDTO);
+                } catch (SQLException ex) {
+                    ex.fillInStackTrace();
+                    JOptionPane.showMessageDialog(NDialog.this,"SQLエラー", "エラー", JOptionPane.ERROR_MESSAGE);
+                    System.exit(1);
                 }
+                //listに追加
+                Controller.list.add(cospaDTO);
+
+                setVisible(false);
+            } else {
+                //一括正誤判定
+                JTextField[] dif = Arrays.stream(textFields).filter(t -> !t.getInputVerifier().verify(t)).toArray(JTextField[]::new);
+                Arrays.stream(dif).forEach(t -> t.setBorder(lBRed));
+                Timer timer = new Timer(100, new ActionListener() {
+                    int c = 0;
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        c++;
+                        if (c == 5) {((Timer) e.getSource()).stop();
+                        }else if(c%2 == 0) {Arrays.stream(dif).forEach(t -> t.setBorder(lBRed));
+                        }else if (c%2 == 1){Arrays.stream(dif).forEach(t -> t.setBorder(lBOrange));
+                        }
+                        Arrays.stream(dif).forEach(Component::repaint);
+                    }
+                });
+                timer.start();
+
+                Arrays.stream(textFields).filter(t -> t.getInputVerifier().verify(t)).forEach(t -> t.setBorder(lBBlue));
+                Toolkit.getDefaultToolkit().beep();
             }
         });
         //コンポーネント配置
@@ -133,7 +129,6 @@ public class NDialog extends JDialog {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         pack();
-
     }
     //セッター
     public void setCalT(String str) {this.calT.setText(str);}

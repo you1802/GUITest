@@ -9,14 +9,11 @@ import static function.WindowDAO.*;
 
 public class CospaDAO {
 
-    public CospaDAO(){
-
-    }
+    public CospaDAO(){}
 
     //読み込み
     public ArrayList<CospaDTO> load() throws SQLException {
         ArrayList<CospaDTO> list = new ArrayList<>();
-
 
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             Statement sta = con.createStatement();
@@ -43,7 +40,6 @@ public class CospaDAO {
             }
             con.close();
             return list;
-
     }
 
     //保存
@@ -65,9 +61,7 @@ public class CospaDAO {
             psta.setBoolean(9, cospaDTO.isDeleted());
 
             psta.execute();
-
             con.close();
-
     }
 
     //削除フラグをオン
@@ -81,9 +75,7 @@ public class CospaDAO {
                     """);
             psta.setInt(1, id);
             psta.execute();
-
             con.close();
-
     }
 
     public void unDeleDB(int id) throws SQLException {
@@ -96,7 +88,6 @@ public class CospaDAO {
                     """);
             psta.setInt(1, id);
             psta.execute();
-
             con.close();
     }
 
@@ -112,7 +103,6 @@ public class CospaDAO {
             psta.setString(1, s);
             psta.setInt(2, id);
             psta.execute();
-
             con.close();
 
         return s;
@@ -129,9 +119,7 @@ public class CospaDAO {
             psta.setString(1, s);
             psta.setInt(2, id);
             psta.execute();
-
             con.close();
-
 
         return s;
     }
@@ -140,14 +128,13 @@ public class CospaDAO {
 
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
-                     UPDATE cospa 
-                     SET cost = ? 
+                     UPDATE cospa
+                     SET cost = ?
                      WHERE id = ?
                      """);
             psta.setInt(1, i);
             psta.setInt(2, id);
             psta.execute();
-
             con.close();
 
         return i;
@@ -157,14 +144,13 @@ public class CospaDAO {
 
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
-                     UPDATE cospa 
-                     SET purpose = ? 
+                     UPDATE cospa
+                     SET purpose = ?
                      WHERE id = ?
                      """);
             psta.setInt(1, i);
             psta.setInt(2, id);
             psta.execute();
-
             con.close();
 
         return i;
@@ -174,14 +160,13 @@ public class CospaDAO {
 
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
-                     UPDATE cospa 
-                     SET number = ? 
+                     UPDATE cospa
+                     SET number = ?
                      WHERE id = ?
                      """);
             psta.setInt(1, i);
             psta.setInt(2, id);
             psta.execute();
-
             con.close();
 
         return i;
@@ -191,14 +176,13 @@ public class CospaDAO {
 
             Connection con = DriverManager.getConnection(DB_URL, DB_NAME, DB_PASS);
             PreparedStatement psta = con.prepareStatement("""
-                     UPDATE cospa 
-                     SET calory = ? 
+                     UPDATE cospa
+                     SET calory = ?
                      WHERE id = ?
                      """);
             psta.setInt(1, i);
             psta.setInt(2, id);
             psta.execute();
-
             con.close();
 
         return i;

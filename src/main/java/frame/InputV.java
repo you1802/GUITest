@@ -3,7 +3,6 @@ package frame;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.util.Objects;
 
 //入力判定用のクラスを継承して作成
 class InputV extends InputVerifier {
@@ -17,7 +16,6 @@ class InputV extends InputVerifier {
     public static final LineBorder lBGray = new LineBorder(Color.GRAY);
 
     private InputV(String match) {
-
         this.match = match;
     }
 

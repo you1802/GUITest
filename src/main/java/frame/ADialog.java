@@ -67,7 +67,6 @@ public class ADialog extends JDialog {
         renderer.setHorizontalAlignment(JLabel.CENTER);
         tableA.getColumnModel().getColumn(5).setCellRenderer(renderer);
 
-
         mainTM.addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
@@ -98,13 +97,11 @@ public class ADialog extends JDialog {
                                 System.exit(1);
                             }
                         }
-
                         mainTM.fireTableCellUpdated(row, 9);    //更新指示
 
                         tableA.repaint();
 
                         mainTM.addTableModelListener(this);     //回避処理終了
-
                     }
                 }
             }

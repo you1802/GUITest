@@ -24,15 +24,15 @@ public class CFlame extends JFrame {
     public static final String[] COLUMN_NAMES = {"商品名", "★100y毎c★", "総価格", "単カロリー", "個数", "用途", "日時", "URL", "id", "削除子"};
     Controller controller;
 
-    {
+    public CFlame() {
         try {
             controller = Controller.getInstance();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.fillInStackTrace();
+            JOptionPane.showMessageDialog(this, "SQLエラー", "エラー", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
         }
-    }
 
-    public CFlame() {
         //メインウィンドウ
         setTitle("amazon");
         setBounds(controller.windowDAO.winX, controller.windowDAO.winY, controller.windowDAO.winWidth, controller.windowDAO.winHeight);
@@ -97,7 +97,7 @@ public class CFlame extends JFrame {
         //ソート機能を追加
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(mainTM);
         table.setRowSorter(sorter);
-        RowFilter<DefaultTableModel, Integer> filter = new RowFilter<DefaultTableModel, Integer>() {
+        RowFilter<DefaultTableModel, Integer> filter = new RowFilter<>() {
             //表示フィルターを設定
             @Override
             public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
@@ -119,7 +119,7 @@ public class CFlame extends JFrame {
         }
 
         //用途欄をコンボボックスで表示
-        JComboBox purCB = new JComboBox(new String[]{"燃料", "糖分", "その他"});
+        JComboBox<String> purCB = new JComboBox<>(new String[]{"燃料", "糖分", "その他"});
         table.getColumnModel().getColumn(5).setCellEditor(new DefaultCellEditor(purCB));
         //中央揃えで表示
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
@@ -142,7 +142,6 @@ public class CFlame extends JFrame {
         bRB.add(perCB);
         //コンポーネントの配置(表示上の並び)
         p1.add(newB); p1.add(Box.createHorizontalStrut(15)); p1.add(bRB); p1.add(Box.createHorizontalStrut(15)); p1.add(allB); p1.add(Box.createGlue()); p1.add(cosB);
-
 
         table.getTableHeader().setReorderingAllowed(false);     //列入れ替えを不可に
         //列ごとにバリデーションを設定
@@ -183,20 +182,17 @@ public class CFlame extends JFrame {
                 if (e.getType() == TableModelEvent.INSERT && e.getSource() == table.getModel()) {
                     TableModelListener listener = this;
                     //他の処理が終わった後に実行
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            mainTM.removeTableModelListener(listener);
-                            try {
-                                int calory = (Integer) mainTM.getValueAt(row, 3);
-                                int cost = (Integer) mainTM.getValueAt(row, 2);
-                                int number = (Integer) mainTM.getValueAt(row, 4);
-                                int result = (calory * 100 * number) / cost;
-                                mainTM.setValueAt(result, row, 1);
-                            } catch (Exception _) {
-                            } finally {     //確実にリスナーを再設定
-                                mainTM.addTableModelListener(listener);
-                            }
+                    SwingUtilities.invokeLater(() -> {
+                        mainTM.removeTableModelListener(listener);
+                        try {
+                            int calory = (Integer) mainTM.getValueAt(row, 3);
+                            int cost = (Integer) mainTM.getValueAt(row, 2);
+                            int number = (Integer) mainTM.getValueAt(row, 4);
+                            int result = (calory * 100 * number) / cost;
+                            mainTM.setValueAt(result, row, 1);
+                        } catch (Exception _) {
+                        } finally {     //確実にリスナーを再設定
+                            mainTM.addTableModelListener(listener);
                         }
                     });
                 }
@@ -252,7 +248,7 @@ public class CFlame extends JFrame {
         });
 
         //削除ボタンアクション
-        removeB.addActionListener(e -> {
+        removeB.addActionListener(_ -> {
             int[] selectRows = table.getSelectedRows();
 
             if (selectRows.length == 0 || selectRows[0] == -1) {
@@ -275,44 +271,40 @@ public class CFlame extends JFrame {
                         System.exit(1);
                     }
                 }
-
                 perCB.setSelected(false);
 
                 sorter.sort();  //再フィルター
-
             }
         });
 
         //すべて表示ボタンアクション
-        allB.addActionListener(e -> {
-
+        allB.addActionListener(_ -> {
             if (this.aDialog == null) {
                 this.aDialog = new ADialog(this);
                 this.aDialog.setLocationRelativeTo(null);
             }
-
             aDialog.setVisible(true);
             sorter.allRowsChanged();
             table.repaint();
         });
 
         //商品追加ボタンアクション
-        newB.addActionListener(e -> {
+        newB.addActionListener(_ -> {
             NDialog nDialog = new NDialog(this);
             nDialog.setLocationRelativeTo(this);
             nDialog.setVisible(true);
         });
 
         //コスパ計算ボタンアクション
-        cosB.addActionListener(e -> {
-            CalcFlame calcFlame = new CalcFlame(this);
+        cosB.addActionListener(_ -> {
+            CalcFlame calcFlame = new CalcFlame();
             calcFlame.setLocationRelativeTo(this);
             calcFlame.setVisible(true);
         });
 
         //メインフレームへの追加
-        this.add(sp, BorderLayout.CENTER);
-        this.add(p1, BorderLayout.NORTH);
+        add(sp, BorderLayout.CENTER);
+        add(p1, BorderLayout.NORTH);
 
         setVisible(true);
     }

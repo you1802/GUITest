@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Controller {
-    private CospaDAO cospaDAO = new CospaDAO();
+    private final CospaDAO cospaDAO = new CospaDAO();
     public WindowDAO windowDAO = new WindowDAO();
     public static ArrayList<CospaDTO> list;
     public static Controller controller;
@@ -43,6 +43,5 @@ public class Controller {
             controller = new Controller();
         }
         return controller;
-
     }
 }
