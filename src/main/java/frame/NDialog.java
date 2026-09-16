@@ -80,7 +80,8 @@ public class NDialog extends JDialog {
                         Integer.parseInt(cosT.getText()),
                         Integer.parseInt(numT.getText()),
                         Integer.parseInt(purT),
-                        Integer.parseInt(calT.getText()));
+                        Integer.parseInt(calT.getText())
+                );
 
                 //CFlameからテーブルを取得して行を追加
                 owner.getTableModel().addRow(cospaDTO.cospaDTOForm());

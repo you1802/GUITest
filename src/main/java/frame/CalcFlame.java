@@ -83,6 +83,7 @@ public class CalcFlame extends JFrame {
         JTextField cspTF = new JTextField(6);
         cspTF.setHorizontalAlignment(JTextField.RIGHT);
         cspTF.setEditable(false);
+        cspTF.setDragEnabled(true);
         cspTF.setFont(leftTFF);
         JLabel cspTitleL = new JLabel("コスパ");
         cspTitleL.setFont(leftTitleF);
@@ -147,14 +148,14 @@ public class CalcFlame extends JFrame {
                 }
                 int result;
                 if (calTBE.isSelected() && cosTBT.isSelected()) {    //calだけが個のとき
-                        result = (cal * 100 * num) / cos;
-                    } else if (calTBT.isSelected() && cosTBE.isSelected()) {   //cosだけが個のとき
-                        result = cal * 100 / (cos * num);
-                    } else {   //総のみまたは個のみ
-                        result = cal * 100 / cos;
-                    }
-                    cspTF.setText(String.valueOf(result));
-                    newB.setEnabled(true);
+                    result = (cal * 100 * num) / cos;
+                } else if (calTBT.isSelected() && cosTBE.isSelected()) {   //cosだけが個のとき
+                    result = cal * 100 / (cos * num);
+                } else {   //総のみまたは個のみ
+                    result = cal * 100 / cos;
+                }
+                cspTF.setText(String.valueOf(result));
+                newB.setEnabled(true);
             } catch (NumberFormatException e) {
                 cspTF.setText("");
                 newB.setEnabled(false);
@@ -206,25 +207,23 @@ public class CalcFlame extends JFrame {
 
             int cal = Integer.parseInt(calT.getText());
             int cos = Integer.parseInt(cosT.getText());
-            if (calTBT.isSelected() && !cosTBT.isSelected()) {    //calだけが個のとき
+            int num = Integer.parseInt(numT.getText());
+            if (calTBE.isSelected() && cosTBT.isSelected()) {    //calだけが個のとき
                 nDialog.setCalT(calT.getText());
                 nDialog.setCosT(cosT.getText());
                 nDialog.setNumT(numT.getText());
-            } else if (!calTBT.isSelected() && cosTBT.isSelected()) {   //cosだけが個のとき
-                int num = Integer.parseInt(numT.getText());
+            } else if (calTBT.isSelected() && cosTBE.isSelected()) {   //cosだけが個のとき
                 int totalCos = cos * num;
                 int eachCal = cal / num;
                 nDialog.setCalT(String.valueOf(eachCal));
                 nDialog.setCosT(String.valueOf(totalCos));
                 nDialog.setNumT(numT.getText());
-            } else if (calTBT.isSelected() && cosTBT.isSelected()) {  //個のみ
-                int num = Integer.parseInt(numT.getText());
+            } else if (calTBE.isSelected() && cosTBE.isSelected()) {  //個のみ
                 int totalCos = cos * num;
                 nDialog.setCalT(calT.getText());
                 nDialog.setCosT(String.valueOf(totalCos));
                 nDialog.setNumT(numT.getText());
-            } else if (!calTBT.isSelected() && !cosTBT.isSelected()) {    //総のみ
-                int num = Integer.parseInt(numT.getText());
+            } else if (calTBT.isSelected() && cosTBT.isSelected()) {    //総のみ
                 int eachCal = cal / num;
                 nDialog.setCalT(String.valueOf(eachCal));
                 nDialog.setCosT(cosT.getText());
@@ -239,14 +238,16 @@ public class CalcFlame extends JFrame {
         dispSubL.setBorder(bd);
         dispSubL.setAlignmentX(Component.RIGHT_ALIGNMENT);
 
-        JLabel dispInL = new JLabel(" ");
-        dispInL.setPreferredSize(dispLSize);
-        dispInL.setMinimumSize(dispLSize);
-        dispInL.setMaximumSize(dispLSize);
-        dispInL.setHorizontalAlignment(JLabel.RIGHT);
-        dispInL.setBorder(bd);
-        dispInL.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        dispInL.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 32));
+        JTextField dispInT = new JTextField(" ");
+        dispInT.setPreferredSize(dispLSize);
+        dispInT.setMinimumSize(dispLSize);
+        dispInT.setMaximumSize(dispLSize);
+        dispInT.setHorizontalAlignment(JLabel.RIGHT);
+        dispInT.setBorder(bd);
+        dispInT.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        dispInT.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 32));
+        dispInT.setBackground(new Color(214, 217, 223));
+        dispInT.setDragEnabled(true);
 
         JButton toCosTB = new JButton("価格");
         JButton toCalTB = new JButton("カロリー");
@@ -346,7 +347,7 @@ public class CalcFlame extends JFrame {
                         }
                     }
                     case "=" -> calcPushEqual(cV.calcIn, cV.calcSubS, cV.b);
-                    case "" -> System.out.println(centerCalcBtnP.getSize());
+                    case "" -> dispLogList.clearSelection();
                     default -> {
                         if (cV.b[0]) {     //答えが残っているとき、クリアしてから入力
                             cV.calcIn.setLength(0);
@@ -355,7 +356,7 @@ public class CalcFlame extends JFrame {
                         cV.calcIn.append(b.getText());
                     }
                 }
-                dispInL.setText(cV.calcIn.toString());
+                dispInT.setText(cV.calcIn.toString());
                 dispSubL.setText(cV.calcSubS.toString());
             });
         });
@@ -443,7 +444,7 @@ public class CalcFlame extends JFrame {
         leftP.add(newB);
 
         centerDispP.add(dispSubL);
-        centerDispP.add(dispInL);
+        centerDispP.add(dispInT);
 
         centerBtnP.add(toCalTB);
         centerBtnP.add(toCosTB);
@@ -519,7 +520,7 @@ public class CalcFlame extends JFrame {
             }
             //計算してlogに入れる
             switch (subD.charAt(subD.length() - 1)) {
-                case '÷' -> result = new  BigDecimal(subD.substring(0, subD.length() - 1)).divide(new BigDecimal(in.toString()), 2, RoundingMode.HALF_UP);
+                case '÷' -> result = new  BigDecimal(subD.substring(0, subD.length() - 1)).divide(new BigDecimal(in.toString()), 0, RoundingMode.HALF_UP);
                 case '×' -> result = new  BigDecimal(subD.substring(0, subD.length() - 1)).multiply(new BigDecimal(in.toString()));
                 case '+' -> result = new  BigDecimal(subD.substring(0, subD.length() - 1)).add(new BigDecimal(in.toString()));
                 case '-' -> result = new  BigDecimal(subD.substring(0, subD.length() - 1)).subtract(new BigDecimal(in.toString()));

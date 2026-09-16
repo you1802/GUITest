@@ -34,7 +34,7 @@ public class CFlame extends JFrame {
         }
 
         //メインウィンドウ
-        setTitle("amazon");
+        setTitle("CospaLog");
         setBounds(controller.windowDAO.winX, controller.windowDAO.winY, controller.windowDAO.winWidth, controller.windowDAO.winHeight);
 
         //ウィンドウを閉じた時の処理
@@ -176,7 +176,7 @@ public class CFlame extends JFrame {
                 int row = e.getFirstRow();
                 int column = e.getColumn();
 
-                if (row < 0 || row == TableModelEvent.HEADER_ROW) return; //非選択時何もしない
+                if (row < 0) return; //非選択時何もしない
 
                 //行追加時コスパ計算
                 if (e.getType() == TableModelEvent.INSERT && e.getSource() == table.getModel()) {
